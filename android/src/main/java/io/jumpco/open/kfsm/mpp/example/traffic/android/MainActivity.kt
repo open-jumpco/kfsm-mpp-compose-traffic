@@ -19,6 +19,7 @@ import io.jumpco.open.kfsm.mpp.example.traffic.activity.Intersection
 import io.jumpco.open.kfsm.mpp.example.traffic.view.TrafficIntersectionViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
@@ -39,7 +40,7 @@ class MainActivity : AppCompatActivity() {
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        CoroutineScope(Dispatchers.Default).launch {
+        CoroutineScope(Dispatchers.Default).async {
             intersectionViewModel.setupIntersection()
         }
         setContent {
