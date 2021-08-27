@@ -1,0 +1,53 @@
+= KFSM MPP Compose Traffic Intersection Demo
+:figure-caption!:
+
+This application demonstrates using 2 state machines to provide a solution.
+The traffic light state machine operates the light and only has a stop and go event. The stop event will switch to amber and after a timeout switch to red and generate a stopped notification.
+
+The intersection state machine cycles through controlling the lights in order, sending go to current light and then waiting after stopped before switching to next light sending the go event.
+
+The `TrafficIntersectionService` can be created by providing a different number of lights.
+
+The application illustrates how to create a view models that uses `Channel` and `StateFlow` and `SharedFlow` to represent the changing values and states so that compose can update the UI efficiently.
+
+== Running
+
+=== Desktop
+
+[source,bash]
+....
+./gradlew :desktop run
+....
+
+=== Android
+
+Launch the application using any AVD and let us know if you experience any problems.
+The Android version should respond to orientation changes if your device or AVD is configured to change orientation automatically.
+
+== Traffic Intersection Classes
+
+image:traffic-intersection-model.svg[Static]
+
+== Generated Traffic Light Models
+
+=== Simple State Diagram
+
+image:traffic-light-simple.svg[Static]
+
+=== Detailed State Diagram
+
+image:traffic-light.svg[Static]
+
+include::generated/traffic-light.adoc[]
+
+== Generated Intersection Models
+
+=== Simple State Diagram
+
+image:traffic-intersection-simple.svg[Static]
+
+=== Detailed State Diagram
+
+image:traffic-intersection.svg[Static]
+
+include::generated/traffic-intersection.adoc[]
