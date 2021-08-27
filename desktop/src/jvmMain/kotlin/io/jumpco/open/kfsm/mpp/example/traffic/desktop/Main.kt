@@ -12,6 +12,7 @@ import io.jumpco.open.kfsm.mpp.example.traffic.App
 import io.jumpco.open.kfsm.mpp.example.traffic.view.TrafficIntersectionViewModel
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import mu.KotlinLogging
 import kotlin.system.exitProcess
 
@@ -33,7 +34,7 @@ fun main() = application {
         state = WindowState(),
         onCloseRequest = { exitProcess(0) }) {
         val coroutineScope = rememberCoroutineScope()
-        coroutineScope.async {
+        coroutineScope.launch {
             intersectionViewModel.setupIntersection()
         }
         portraitMode.value = window.bounds.height > window.bounds.width

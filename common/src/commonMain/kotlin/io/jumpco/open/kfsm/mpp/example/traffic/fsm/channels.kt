@@ -13,7 +13,7 @@ fun <T> sendToChannel(
     flow: MutableStateFlow<T>,
     dispatcher: CoroutineDispatcher = Dispatchers.Default
 ) {
-    GlobalScope.async {
+    GlobalScope.launch {
         while (true) {
             val result = channel.receive()
             CoroutineScope(dispatcher).launch {
@@ -28,7 +28,7 @@ fun <T> sendToChannel(
     flow: MutableSharedFlow<T>,
     dispatcher: CoroutineDispatcher = Dispatchers.Default
 ) {
-    GlobalScope.async {
+    GlobalScope.launch {
         while (true) {
             val result = channel.receive()
             CoroutineScope(dispatcher).launch {
@@ -39,7 +39,7 @@ fun <T> sendToChannel(
 }
 
 fun <T> sharedFlowToChannel(flow: SharedFlow<T>, channel: SendChannel<T>) {
-    GlobalScope.async {
+    GlobalScope.launch {
         flow.collect {
             channel.send(it)
         }

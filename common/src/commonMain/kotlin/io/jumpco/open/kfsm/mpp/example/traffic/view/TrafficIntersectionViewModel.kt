@@ -5,13 +5,10 @@ import com.example.kfsm.compose.traffic.fsm.IntersectionEvents
 import com.example.kfsm.compose.traffic.fsm.IntersectionStates
 import com.example.kfsm.compose.traffic.fsm.TrafficIntersectionEventHandler
 import com.example.kfsm.compose.traffic.fsm.TrafficLightEventHandler
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.withContext
 import mu.KotlinLogging
 
 
@@ -54,7 +51,7 @@ class TrafficIntersectionViewModel constructor(
 
     suspend fun setupIntersection() {
         trafficIntersection.setupIntersection()
-        CoroutineScope(Dispatchers.Default).async {
+        CoroutineScope(Dispatchers.Default).launch {
             trafficIntersection.stopped.collect {
                 trafficIntersection.stopped()
             }
@@ -63,7 +60,7 @@ class TrafficIntersectionViewModel constructor(
             logger.info { "state.collect:$toState" }
             determineAllowed()
         }
-        CoroutineScope(Dispatchers.Default).async {
+        CoroutineScope(Dispatchers.Default).launch {
             determineAllowed()
         }
     }
