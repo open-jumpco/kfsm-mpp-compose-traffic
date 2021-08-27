@@ -1,0 +1,25 @@
+@startuml
+skinparam monochrome true
+skinparam StateFontName Helvetica
+skinparam defaultFontName Monospaced
+skinparam defaultFontStyle Bold
+skinparam state {
+    FontStyle Bold
+}
+state TrafficIntersectionFSM {
+[*] --> STOPPED
+STOPPED --> GOING : START -> {\l  logger.info{"STOPPED:START"}\l  start()\l}
+STOPPED --> STOPPED : STOPPED -> {\l  logger.info{"STOPPED:STOPPED"}\l}
+GOING --> STOPPING : <<timeout = {cycleTime}>> -> {\l  logger.info{"GOING:timeout"}\l  stop()\l}
+GOING --> STOPPING : SWITCH -> {\l  logger.info{"GOING:SWITCH"}\l  stop()\l}
+GOING --> WAITING_STOPPED : STOP -> {\l  logger.info{"GOING:STOP"}\l  stop()\l}
+STOPPING --> WAITING : STOPPED -> {\l  logger.info{"STOPPED"}\l}
+STOPPING --> STOPPING : SWITCH -> {\l  logger.info{"SWITCH"}\l}
+STOPPING --> WAITING_STOPPED : STOP -> {\l  logger.info{"STOP"}\l}
+WAITING --> GOING : <<timeout = {cycleWaitTime}>> -> {\l  logger.info{"WAITING:timeout"}\l  next()\l  start()\l}
+WAITING --> WAITING : SWITCH -> {\l  logger.info{"WAITING:SWITCH"}\l}
+WAITING --> STOPPED : STOP -> {\l  logger.info{"WAITING:STOP"}\l  off()\l}
+WAITING_STOPPED --> STOPPED : <<timeout = {cycleWaitTime/2}>> -> {\l  logger.info{"WAITING_STOPPED:timeout"}\l  off()\l}
+WAITING_STOPPED --> STOPPED : STOPPED -> {\l  logger.info{"WAITING_STOPPED:STOPPED:ignore"}\l  off()\l}
+}
+@enduml

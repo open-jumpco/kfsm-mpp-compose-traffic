@@ -63,6 +63,11 @@ kotlin {
         }
         val desktopTest by getting
     }
+    targets.all {
+        compilations.all {
+            kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.ExperimentalMultiplatform"
+        }
+    }
 }
 
 android {

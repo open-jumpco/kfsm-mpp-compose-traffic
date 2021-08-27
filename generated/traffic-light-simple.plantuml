@@ -1,0 +1,22 @@
+@startuml
+skinparam monochrome true
+skinparam StateFontName Helvetica
+skinparam defaultFontName Monospaced
+skinparam defaultFontStyle Bold
+skinparam state {
+    FontStyle Bold
+}
+state TrafficLightFSM {
+[*] --> OFF
+OFF --> GREEN : GO
+OFF --> RED : STOP
+RED --> GREEN : GO
+RED --> RED : STOP
+RED --> OFF : OFF
+AMBER --> RED : <<timeout = {amberTimeout}>>
+AMBER --> AMBER : STOP
+AMBER --> OFF : OFF
+GREEN --> AMBER : STOP
+GREEN --> OFF : OFF
+}
+@enduml

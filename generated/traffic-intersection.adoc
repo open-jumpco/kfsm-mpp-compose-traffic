@@ -1,0 +1,152 @@
+== TrafficIntersectionFSM State Chart
+
+=== TrafficIntersectionFSM State Map
+
+|===
+| Start | Event[Guard] | Target | Action
+
+| <<start>>
+| 
+| STOPPED
+a| 
+
+| STOPPED
+| START
+| GOING
+a| [source,kotlin]
+----
+{
+logger.info{"STOPPED:START"}
+start()
+}
+----
+
+| STOPPED
+| STOPPED
+| STOPPED
+a| [source,kotlin]
+----
+{
+logger.info{"STOPPED:STOPPED"}
+}
+----
+
+| GOING
+| \<<timeout = {cycleTime}>>
+| STOPPING
+a| [source,kotlin]
+----
+{
+logger.info{"GOING:timeout"}
+stop()
+}
+----
+
+| GOING
+| SWITCH
+| STOPPING
+a| [source,kotlin]
+----
+{
+logger.info{"GOING:SWITCH"}
+stop()
+}
+----
+
+| GOING
+| STOP
+| WAITING_STOPPED
+a| [source,kotlin]
+----
+{
+logger.info{"GOING:STOP"}
+stop()
+}
+----
+
+| STOPPING
+| STOPPED
+| WAITING
+a| [source,kotlin]
+----
+{
+logger.info{"STOPPED"}
+}
+----
+
+| STOPPING
+| SWITCH
+| STOPPING
+a| [source,kotlin]
+----
+{
+logger.info{"SWITCH"}
+}
+----
+
+| STOPPING
+| STOP
+| WAITING_STOPPED
+a| [source,kotlin]
+----
+{
+logger.info{"STOP"}
+}
+----
+
+| WAITING
+| \<<timeout = {cycleWaitTime}>>
+| GOING
+a| [source,kotlin]
+----
+{
+logger.info{"WAITING:timeout"}
+next()
+start()
+}
+----
+
+| WAITING
+| SWITCH
+| WAITING
+a| [source,kotlin]
+----
+{
+logger.info{"WAITING:SWITCH"}
+}
+----
+
+| WAITING
+| STOP
+| STOPPED
+a| [source,kotlin]
+----
+{
+logger.info{"WAITING:STOP"}
+off()
+}
+----
+
+| WAITING_STOPPED
+| \<<timeout = {cycleWaitTime/2}>>
+| STOPPED
+a| [source,kotlin]
+----
+{
+logger.info{"WAITING_STOPPED:timeout"}
+off()
+}
+----
+
+| WAITING_STOPPED
+| STOPPED
+| STOPPED
+a| [source,kotlin]
+----
+{
+logger.info{"WAITING_STOPPED:STOPPED:ignore"}
+off()
+}
+----
+|===
+
