@@ -4,18 +4,24 @@ enum class TrafficLightStates {
     RED,
     AMBER,
     GREEN,
-    OFF
+    OFF,
+    FLASHING_ON,
+    FLASHING_OFF
 }
 
 enum class TrafficLightEvents {
+    ON,
+    OFF,
     STOP,
     GO,
-    OFF
+    FLASH
 }
 
 interface TrafficLightContext {
     val name: String
     val amberTimeout: Long
+    val flashingOnTimeout: Long
+    val flashingOffTimeout: Long
     suspend fun setStopped()
     suspend fun switchRed(on: Boolean)
     suspend fun switchAmber(on: Boolean)

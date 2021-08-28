@@ -66,6 +66,7 @@ kotlin {
     targets.all {
         compilations.all {
             kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.ExperimentalMultiplatform"
+            kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
         }
     }
 }

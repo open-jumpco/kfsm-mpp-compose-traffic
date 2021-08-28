@@ -1,0 +1,62 @@
+@startuml
+
+enum TrafficLightStates <<fsm-state>> {
+    RED
+    AMBER
+    GREEN
+}
+
+enum TrafficLightEvents <<fsm-event>> {
+    STOP
+    GO
+}
+interface TrafficLightContext <<fsm-context>> {
+    name: String
+    amberTimeout: Long
+    setStopped() <<suspend>>
+    switchRed(on: Boolean) <<suspend>>
+    switchAmber(on: Boolean) <<suspend>>
+    switchGreen(on: Boolean) <<suspend>>
+    stateChanged(toState: TrafficLightStates) <<suspend>>
+}
+
+interface TrafficLightEventHandler {
+    amber: StateFlow<Boolean>
+    red: StateFlow<Boolean>
+    green: StateFlow<Boolean>
+    stopped: SharedFlow<Long>
+    state: StateFlow<TrafficLightStates>
+    changeAmberTimeout(value: Long)
+}
+TrafficLightEventHandler -down-|> TrafficLightContext
+
+class TrafficLightFSM <<fsm>> {
+    fun start() <<suspend>>
+    fun stop() <<suspend>>
+}
+
+TrafficLightFSM ..> TrafficLightStates: <<uses>>
+TrafficLightFSM ..> TrafficLightEvents: <<uses>>
+TrafficLightFSM -left-> TrafficLightContext: context
+
+class TrafficLightService <<context-implementation>> {
+    name: String
+    amberTimeout: Long
+    amber: StateFlow<Boolean>
+    red: StateFlow<Boolean>
+    green: StateFlow<Boolean>
+    stopped: SharedFlow<Long>
+    state: StateFlow<TrafficLightStates>
+    changeAmberTimeout(value: Long)
+
+    setStopped() <<suspend>>
+    switchRed(on: Boolean) <<suspend>>
+    switchAmber(on: Boolean) <<suspend>>
+    switchGreen(on: Boolean) <<suspend>>
+    stateChanged(toState: TrafficLightStates) <<suspend>>
+}
+
+TrafficLightService --|> TrafficLightEventHandler
+TrafficLightService *--> TrafficLightFSM: fsm
+
+@enduml

@@ -1,5 +1,8 @@
-package com.example.kfsm.compose.traffic.fsm
+package io.jumpco.open.kfsm.mpp.example.traffic.fsm
 
+import com.example.kfsm.compose.traffic.fsm.TrafficLightContext
+import com.example.kfsm.compose.traffic.fsm.TrafficLightEvents
+import com.example.kfsm.compose.traffic.fsm.TrafficLightStates
 import io.jumpco.open.kfsm.async.asyncStateMachine
 import mu.KotlinLogging
 
@@ -19,13 +22,8 @@ class TrafficLightFSM(context: TrafficLightContext) {
                 onEntry { _, _, _ ->
                     logger.info { "OFF:$name" }
                 }
-                onEvent(TrafficLightEvents.GO to TrafficLightStates.GREEN) {
-                    logger.info { "OFF:GO:$name" }
-                    switchRed(false)
-                    switchGreen(true)
-                }
-                onEvent(TrafficLightEvents.STOP to TrafficLightStates.RED) {
-                    logger.info { "OFF:STOP:$name" }
+                onEvent(TrafficLightEvents.ON to TrafficLightStates.RED) {
+                    logger.info { "OFF:ON_OFF:$name" }
                     switchRed(true)
                 }
             }
@@ -45,10 +43,13 @@ class TrafficLightFSM(context: TrafficLightContext) {
                     switchRed(true)
                 }
                 onEvent(TrafficLightEvents.OFF to TrafficLightStates.OFF) {
-                    logger.info { "RED:OFF:$name" }
+                    logger.info { "RED:ON_OFF:$name" }
                     switchGreen(false)
                     switchAmber(false)
-                    switchRed(true)
+                    switchRed(false)
+                }
+                onEvent(TrafficLightEvents.FLASH to TrafficLightStates.FLASHING_ON) {
+                    logger.info { "RED:FLASH:$name" }
                 }
             }
             whenState(TrafficLightStates.AMBER) {
@@ -65,10 +66,10 @@ class TrafficLightFSM(context: TrafficLightContext) {
                     logger.info { "AMBER:STOP:$name" }
                 }
                 onEvent(TrafficLightEvents.OFF to TrafficLightStates.OFF) {
-                    logger.info { "AMBER:OFF:$name" }
+                    logger.info { "AMBER:ON_OFF:$name" }
                     switchGreen(false)
                     switchAmber(false)
-                    switchRed(true)
+                    switchRed(false)
                 }
             }
             whenState(TrafficLightStates.GREEN) {
@@ -84,6 +85,36 @@ class TrafficLightFSM(context: TrafficLightContext) {
                     logger.info { "GREEN:OFF:$name" }
                     switchGreen(false)
                     switchAmber(false)
+                    switchRed(false)
+                }
+            }
+            whenState(TrafficLightStates.FLASHING_ON) {
+                onEntry { _, _, _ ->
+                    logger.info { "FLASHING_ON:$name" }
+                }
+                timeout(TrafficLightStates.FLASHING_OFF, { flashingOnTimeout }) {
+                    switchRed(false)
+                }
+                onEvent(TrafficLightEvents.OFF to TrafficLightStates.OFF) {
+                    logger.info { "FLASHING_ON:OFF:$name" }
+                    switchGreen(false)
+                    switchAmber(false)
+                    switchRed(false)
+                }
+                onEvent(TrafficLightEvents.STOP to TrafficLightStates.RED) {
+                }
+            }
+            whenState(TrafficLightStates.FLASHING_OFF) {
+                onEntry { _, _, _ ->
+                    logger.info { "FLASHING_OFF:$name" }
+                }
+                timeout(TrafficLightStates.FLASHING_ON, { flashingOffTimeout }) {
+                    switchRed(true)
+                }
+                onEvent(TrafficLightEvents.OFF to TrafficLightStates.OFF) {
+                    logger.info { "FLASHING_OFF:OFF:$name" }
+                }
+                onEvent(TrafficLightEvents.STOP to TrafficLightStates.RED) {
                     switchRed(true)
                 }
             }
@@ -100,8 +131,16 @@ class TrafficLightFSM(context: TrafficLightContext) {
         fsm.sendEvent(TrafficLightEvents.STOP)
     }
 
+    suspend fun on() {
+        fsm.sendEvent(TrafficLightEvents.ON)
+    }
+
     suspend fun off() {
         fsm.sendEvent(TrafficLightEvents.OFF)
+    }
+
+    suspend fun flash() {
+        fsm.sendEvent(TrafficLightEvents.FLASH)
     }
 }
 

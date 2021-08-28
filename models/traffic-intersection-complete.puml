@@ -6,8 +6,21 @@ enum TrafficLightStates <<fsm-state>> {
     GREEN
 }
 
-interface TrafficLightEventHandler {
+enum TrafficLightEvents <<fsm-event>> {
+    STOP
+    GO
+}
+interface TrafficLightContext <<fsm-context>> {
     name: String
+    amberTimeout: Long
+    setStopped() <<suspend>>
+    switchRed(on: Boolean) <<suspend>>
+    switchAmber(on: Boolean) <<suspend>>
+    switchGreen(on: Boolean) <<suspend>>
+    stateChanged(toState: TrafficLightStates) <<suspend>>
+}
+
+interface TrafficLightEventHandler {
     amber: StateFlow<Boolean>
     red: StateFlow<Boolean>
     green: StateFlow<Boolean>
@@ -15,8 +28,37 @@ interface TrafficLightEventHandler {
     state: StateFlow<TrafficLightStates>
     changeAmberTimeout(value: Long)
 }
+TrafficLightEventHandler -|> TrafficLightContext
 
-TrafficLightEventHandler ..> TrafficLightStates
+class TrafficLightFSM <<fsm>> {
+    fun start() <<suspend>>
+    fun stop() <<suspend>>
+}
+
+TrafficLightFSM ..> TrafficLightStates: <<uses>>
+TrafficLightFSM ..> TrafficLightEvents: <<uses>>
+TrafficLightFSM --> TrafficLightContext: context
+
+class TrafficLightService <<context-implementation>> {
+    name: String
+    amberTimeout: Long
+    amber: StateFlow<Boolean>
+    red: StateFlow<Boolean>
+    green: StateFlow<Boolean>
+    stopped: SharedFlow<Long>
+    state: StateFlow<TrafficLightStates>
+    changeAmberTimeout(value: Long)
+
+    setStopped() <<suspend>>
+    switchRed(on: Boolean) <<suspend>>
+    switchAmber(on: Boolean) <<suspend>>
+    switchGreen(on: Boolean) <<suspend>>
+    stateChanged(toState: TrafficLightStates) <<suspend>>
+}
+
+TrafficLightService --|> TrafficLightEventHandler
+TrafficLightService *--> TrafficLightFSM: fsm
+
 
 enum IntersectionStates <<fsm-state>> {
     STOPPING
@@ -62,7 +104,6 @@ interface TrafficIntersectionEventHandler {
     currentName: String
     current: TrafficLightContext
     listOrder: List<String>
-    trafficLights: List<TrafficLightEventHandler>
     get(name: String): TrafficLightEventHandler
     changeCycleTime(value: Long)
     changeCycleWaitTime(value: Long)
@@ -78,6 +119,7 @@ interface TrafficIntersectionEventHandler {
 }
 
 TrafficIntersectionEventHandler -|> TrafficIntersectionContext
+TrafficIntersectionEventHandler *--> TrafficLightEventHandler: trafficLights
 
 class TrafficIntersectionService {
     state: StateFlow<IntersectionStates>
@@ -110,28 +152,26 @@ class TrafficIntersectionService {
 
 TrafficIntersectionService --|> TrafficIntersectionEventHandler
 TrafficIntersectionService *--> TrafficIntersectionFSM: intersectionFSM <<private>>
-TrafficIntersectionService --> TrafficLightEventHandler: trafficLights <<private>>
+TrafficIntersectionService *--> "1..n" TrafficLightEventHandler: trafficLights <<private>>
 
 class TrafficIntersectionViewModel <<viewmodel>> #lightgreen {
     val amberTimeout: Long
     val cycleWaitTime: Long
     val cycleTime: Long
     val currentName: String
+    val trafficLights: List<TrafficLightEventHandler>
 
     val intersectionState: StateFlow<IntersectionStates>
     val allowStart: StateFlow<Boolean>
     val allowSwitch: StateFlow<Boolean>
     val allowStop: StateFlow<Boolean>
+    val trafficLights: List<TrafficLightEventHandler>
 
     startSystem() <<suspend>>
     stopSystem() <<suspend>>
     switch() <<suspend>>
 }
 
-TrafficIntersectionViewModel *--> "1..n" TrafficLightEventHandler: trafficLights
-TrafficIntersectionViewModel *--> TrafficIntersectionEventHandler: trafficIntersection
-
-class ViewModel <<android>> #green {
-}
+TrafficIntersectionViewModel --> TrafficIntersectionEventHandler: trafficIntersection
 
 @enduml

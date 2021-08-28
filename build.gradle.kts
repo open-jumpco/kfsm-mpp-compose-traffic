@@ -1,4 +1,5 @@
 import io.jumpco.open.kfsm.gradle.VizPluginExtension
+
 buildscript {
     repositories {
         gradlePluginPortal()
@@ -23,20 +24,20 @@ allprojects {
         maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     }
 }
-
+val fsmFolder = "common/src/commonMain/kotlin/io/jumpco/open/kfsm/mpp/example/traffic/fsm"
 configure<VizPluginExtension> {
     fsm("TrafficLightFSM") {
-        input = file("common/src/commonMain/kotlin/io/jumpco/open/kfsm/mpp/example/traffic/fsm/TrafficLightFSM.kt")
-        isGeneratePlantUml = true // (2)
-        isGenerateAsciidoc = true // (3)
-        output = "traffic-light" // (4)
-        outputFolder = file("generated") // (5)
+        input = file("${fsmFolder}/TrafficLightFSM.kt")
+        isGeneratePlantUml = true
+        isGenerateAsciidoc = true
+        output = "traffic-light"
+        outputFolder = file("generated")
     }
     fsm("TrafficIntersectionFSM") {
-        input = file("common/src/commonMain/kotlin/io/jumpco/open/kfsm/mpp/example/traffic/fsm/TrafficIntersectionFSM.kt")
-        isGeneratePlantUml = true // (2)
-        isGenerateAsciidoc = true // (3)
-        output = "traffic-intersection" // (4)
-        outputFolder = file("generated") // (5)
+        input = file("${fsmFolder}/TrafficIntersectionFSM.kt")
+        isGeneratePlantUml = true
+        isGenerateAsciidoc = true
+        output = "traffic-intersection"
+        outputFolder = file("generated")
     }
 }

@@ -17,7 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import com.example.kfsm.compose.traffic.fsm.IntersectionStates
+import io.jumpco.open.kfsm.mpp.example.traffic.fsm.IntersectionStates
 import io.jumpco.open.kfsm.mpp.example.traffic.view.TrafficIntersectionViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -49,39 +49,125 @@ fun StateButton(
 fun IntersectionControls(
     modifier: Modifier,
     model: TrafficIntersectionViewModel,
+    portraitMode: Boolean,
     coroutineScope: CoroutineScope
 ) {
-    Row(
-        modifier.padding(4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceEvenly
-    ) {
-        val allowStart = model.allowStart.collectAsState(false)
-        StateButton(
-            "Start",
-            allowStart.value,
-            model,
-            coroutineScope
+    val allowOnOff = model.allowOnOff.collectAsState(false)
+    val allowStart = model.allowStart.collectAsState(false)
+    val allowStop = model.allowStop.collectAsState(false)
+    val allowSwitch = model.allowSwitch.collectAsState(false)
+    val allowFlash = model.allowFlash.collectAsState(false)
+    if(portraitMode) {
+        Row(
+            modifier.padding(4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            startSystem()
+            StateButton(
+                "On / Off",
+                allowOnOff.value,
+                model,
+                coroutineScope
+            ) {
+                onOffSystem()
+            }
         }
-        val allowStop = model.allowStop.collectAsState(false)
-        StateButton(
-            "Stop",
-            allowStop.value,
-            model,
-            coroutineScope
+        Row(
+            modifier.padding(4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            stopSystem()
+            StateButton(
+                "Start",
+                allowStart.value,
+                model,
+                coroutineScope
+            ) {
+                startSystem()
+            }
+            StateButton(
+                "Stop",
+                allowStop.value,
+                model,
+                coroutineScope
+            ) {
+                stopSystem()
+            }
+            StateButton(
+                "Switch",
+                allowSwitch.value,
+                model,
+                coroutineScope
+            ) {
+                switch()
+            }
+            StateButton(
+                "Flash",
+                allowFlash.value,
+                model,
+                coroutineScope
+            ) {
+                flashSystem()
+            }
         }
-        val allowSwitch = model.allowSwitch.collectAsState(false)
-        StateButton(
-            "Switch",
-            allowSwitch.value,
-            model,
-            coroutineScope
+    } else {
+        Row(
+            modifier.padding(4.dp),
+            verticalAlignment = Alignment.Top,
+            horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            switch()
+            StateButton(
+                "On / Off",
+                allowOnOff.value,
+                model,
+                coroutineScope
+            ) {
+                onOffSystem()
+            }
+        }
+        Row(
+            modifier.padding(4.dp),
+            verticalAlignment = Alignment.Top,
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            StateButton(
+                "Start",
+                allowStart.value,
+                model,
+                coroutineScope
+            ) {
+                startSystem()
+            }
+            StateButton(
+                "Stop",
+                allowStop.value,
+                model,
+                coroutineScope
+            ) {
+                stopSystem()
+            }
+        }
+        Row(
+            modifier.padding(4.dp),
+            verticalAlignment = Alignment.Top,
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            StateButton(
+                "Switch",
+                allowSwitch.value,
+                model,
+                coroutineScope
+            ) {
+                switch()
+            }
+            StateButton(
+                "Flash",
+                allowFlash.value,
+                model,
+                coroutineScope
+            ) {
+                flashSystem()
+            }
         }
     }
 }
@@ -115,6 +201,14 @@ fun IntersectionState(state: IntersectionStates, viewModel: TrafficIntersectionV
                 withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                     append("${viewModel.amberTimeout}ms")
                 }
+                append(", Flash On time: ")
+                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                    append("${viewModel.flashOnTimeout}ms")
+                }
+                append(", Flash Off time: ")
+                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                    append("${viewModel.flashOffTimeout}ms")
+                }
             }
         )
     }
@@ -124,15 +218,15 @@ fun IntersectionState(state: IntersectionStates, viewModel: TrafficIntersectionV
 fun Intersection(viewModel: TrafficIntersectionViewModel, portraitMode: Boolean) {
     val coroutineScope = rememberCoroutineScope()
     Column {
-        val state = viewModel.intersectionState.collectAsState(IntersectionStates.STOPPED)
+        val state = viewModel.intersectionState.collectAsState(viewModel.currentState)
         if (portraitMode) {
             Column {
                 IntersectionState(state.value, viewModel)
                 Row(
                     Modifier
-                        .fillMaxHeight()
                         .fillMaxWidth()
-                        .weight(0.8f)
+                        .wrapContentHeight(Alignment.CenterVertically)
+                        .weight(0.6f)
                         .padding(16.dp)
                         .drawBehind { drawRect(Color.LightGray) },
                     horizontalArrangement = Arrangement.SpaceEvenly,
@@ -154,6 +248,7 @@ fun Intersection(viewModel: TrafficIntersectionViewModel, portraitMode: Boolean)
                         .fillMaxWidth()
                         .weight(0.2f),
                     viewModel,
+                    portraitMode,
                     coroutineScope
                 )
             }
@@ -173,6 +268,7 @@ fun Intersection(viewModel: TrafficIntersectionViewModel, portraitMode: Boolean)
                             .fillMaxWidth()
                             .weight(1f),
                         viewModel,
+                        portraitMode,
                         coroutineScope
                     )
                 }

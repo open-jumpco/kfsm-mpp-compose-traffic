@@ -1,7 +1,7 @@
-package com.example.kfsm.compose.traffic.fsm
+package io.jumpco.open.kfsm.mpp.example.traffic.fsm
 
-import io.jumpco.open.kfsm.mpp.example.traffic.fsm.sendToChannel
-import kotlinx.coroutines.*
+import com.example.kfsm.compose.traffic.fsm.TrafficLightStates
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,11 +15,12 @@ class TrafficLightService(lightName: String) : TrafficLightEventHandler {
         private val logger = KotlinLogging.logger {}
     }
 
-    private val amberChannel = Channel<Boolean>(2)
-    private val redChannel = Channel<Boolean>(2)
-    private val greenChannel = Channel<Boolean>(2)
-    private val stateChannel = Channel<TrafficLightStates>(2)
-    private val stoppedChannel = Channel<Long>(2)
+    private val fsm = TrafficLightFSM(this)
+    private val amberChannel = Channel<Boolean>(1)
+    private val redChannel = Channel<Boolean>(1)
+    private val greenChannel = Channel<Boolean>(1)
+    private val stateChannel = Channel<TrafficLightStates>(1)
+    private val stoppedChannel = Channel<Long>(1)
     private var _amber = MutableStateFlow(false)
     private var _red = MutableStateFlow(false)
     private var _green = MutableStateFlow(false)
@@ -27,6 +28,10 @@ class TrafficLightService(lightName: String) : TrafficLightEventHandler {
     private val _counter = AtomicLong(1)
     private val _stopped = MutableSharedFlow<Long>()
     private var amberTimeoutValue: Long = 2000L
+    private var flashingOnTimeoutValue: Long = 600L
+    private var flashingOffTimeoutValue: Long = 400L
+    override val flashingOnTimeout: Long get() = flashingOnTimeoutValue
+    override val flashingOffTimeout: Long get() = flashingOffTimeoutValue
 
     override val name: String = lightName
     override val amberTimeout: Long get() = amberTimeoutValue
@@ -38,16 +43,28 @@ class TrafficLightService(lightName: String) : TrafficLightEventHandler {
 
 
     init {
-        sendToChannel(amberChannel, _amber, Dispatchers.Main)
-        sendToChannel(redChannel, _red, Dispatchers.Main)
-        sendToChannel(greenChannel, _green, Dispatchers.Main)
-        sendToChannel(stateChannel, _state, Dispatchers.Main)
-        sendToChannel(stoppedChannel, _stopped, Dispatchers.Main)
+        logger.info("init:start")
+        channelToStateFlow("$name:amberChannel", amberChannel, _amber, Dispatchers.Main)
+        channelToStateFlow("$name:redChannel", redChannel, _red, Dispatchers.Main)
+        channelToStateFlow("$name:greenChannel", greenChannel, _green, Dispatchers.Main)
+        channelToStateFlow("$name:stateChannel", stateChannel, _state, Dispatchers.Main)
+        channelToSharedFlow("$name:stoppedChannel", stoppedChannel, _stopped, Dispatchers.Main)
+        logger.info("init:end")
     }
 
     override fun changeAmberTimeout(value: Long) {
         logger.info { "changeAmberTimeout:$name:$value" }
         amberTimeoutValue = value
+    }
+
+    override fun changeFlashingOnTimeout(value: Long) {
+        logger.info { "changeFlashingOnTimeout:$name:$value" }
+        flashingOnTimeoutValue = value
+    }
+
+    override fun changeFlashingOffTimeout(value: Long) {
+        logger.info { "changeFlashingOffTimeout:$name:$value" }
+        flashingOffTimeoutValue = value
     }
 
     override suspend fun setStopped() {
@@ -78,5 +95,29 @@ class TrafficLightService(lightName: String) : TrafficLightEventHandler {
         logger.info { "stateChanged:$name:$toState:start" }
         stateChannel.send(toState)
         logger.info { "stateChanged:$name:$toState:end" }
+    }
+
+    override suspend fun flash() {
+        logger.info { "flash:$name" }
+        fsm.flash()
+    }
+
+    override suspend fun stop() {
+        logger.info { "stop:$name" }
+        fsm.stop()
+    }
+
+    override suspend fun start() {
+        logger.info { "start:$name" }
+        fsm.start()
+    }
+
+    override suspend fun on() {
+        logger.info { "on:$name" }
+        fsm.on()
+    }
+    override suspend fun off() {
+        logger.info { "off:$name" }
+        fsm.off()
     }
 }

@@ -1,15 +1,11 @@
-package com.example.kfsm.compose.traffic.fsm
+package io.jumpco.open.kfsm.mpp.example.traffic.fsm
 
-import io.jumpco.open.kfsm.mpp.example.traffic.fsm.sendToChannel
-import io.jumpco.open.kfsm.mpp.example.traffic.fsm.sharedFlowToChannel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.channels.ReceiveChannel
 import mu.KotlinLogging
-import java.util.concurrent.atomic.AtomicLong
 
 class TrafficIntersectionService(
     override val trafficLights: List<TrafficLightEventHandler>
@@ -18,49 +14,73 @@ class TrafficIntersectionService(
         private val logger = KotlinLogging.logger {}
     }
 
-    private val stateChannel = Channel<IntersectionStates>(2)
-    private val stoppedChannel = Channel<Long>(2)
+    private val stateChannel = Channel<IntersectionStates>(1)
+    private val stoppedChannel = Channel<Long>(1)
     private val trafficLightData = mutableMapOf<String, TrafficLightEventHandler>()
-    private val stateMachines = mutableMapOf<String, TrafficLightFSM>()
     private val order = mutableListOf<String>()
     private val intersectionFSM = TrafficIntersectionFSM(this)
-    private var _currentName: String
-    private var _current: TrafficLightContext
-    private val _counter = AtomicLong(1)
-    private val _stopped = MutableSharedFlow<Long>()
-    private val _state = MutableStateFlow(IntersectionStates.STOPPED)
+    private var _currentLight: TrafficLightEventHandler
+
     private var _cycleWaitTime: Long = 1000L
     private var _cycleTime: Long = 5000L
     private var _amberTimeout: Long = 2000L
-    override val state: StateFlow<IntersectionStates> get() = _state
-    override val stopped: SharedFlow<Long> get() = _stopped
+    private var _flashOnTimeout: Long = 600L
+    private var _flashOffTimeout: Long = 400L
+    override val state: ReceiveChannel<IntersectionStates> get() = stateChannel
+    override val stopped: ReceiveChannel<Long> get() = stoppedChannel
     override val amberTimeout: Long get() = _amberTimeout
+    override val flashOnTimeout: Long get() = _flashOnTimeout
+    override val flashOffTimeout: Long get() = _flashOffTimeout
+    override val currentState: IntersectionStates get() = intersectionFSM.currentState
 
     init {
+        logger.info("init:start")
         require(trafficLights.isNotEmpty()) { "At least one light is required" }
-        _current = trafficLights[0]
-        _currentName = _current.name
+        _currentLight = trafficLights[0]
         trafficLights.forEach {
             it.changeAmberTimeout(amberTimeout)
+            it.changeFlashingOffTimeout(flashOffTimeout)
+            it.changeFlashingOnTimeout(flashOnTimeout)
             addTrafficLight(it.name, it)
             order.add(it.name)
         }
-        sendToChannel(stateChannel, _state, Dispatchers.Main)
-        sendToChannel(stoppedChannel, _stopped, Dispatchers.Main)
+        logger.info("init:end")
     }
 
     override fun changeAmberTimeout(value: Long) {
         _amberTimeout = value
-        trafficLightData.values.forEach {
+        trafficLights.forEach {
             it.changeAmberTimeout(value)
+        }
+    }
+
+    override fun changeFlashOnTimeout(value: Long) {
+        _flashOnTimeout = value
+        trafficLights.forEach {
+            it.changeFlashingOnTimeout(value)
+        }
+    }
+
+    override fun changeFlashOffTimeout(value: Long) {
+        _flashOffTimeout = value
+        trafficLights.forEach {
+            it.changeFlashingOffTimeout(value)
         }
     }
 
     override suspend fun setupIntersection() {
         logger.info { "setupIntersection:start" }
         trafficLightData.values.forEach {
-            startTrafficLight(it.name)
+            setupTrafficLight(it.name)
         }
+        CoroutineScope(Dispatchers.Default).async {
+            while (true) {
+                val event = stopped.receive()
+                logger.info { "stopped:$event" }
+                intersectionFSM.stopped()
+            }
+        }
+
         logger.info { "setupIntersection:end" }
     }
 
@@ -71,30 +91,25 @@ class TrafficIntersectionService(
     }
 
     override val cycleTime: Long get() = _cycleTime
-    override val currentName: String get() = _currentName
-    override val current: TrafficLightContext get() = _current
+    override val currentName: String get() = _currentLight.name
     override val cycleWaitTime: Long get() = _cycleWaitTime
-    val currentState: IntersectionStates get() = intersectionFSM.currentState
 
     override fun addTrafficLight(name: String, trafficLight: TrafficLightEventHandler) {
-        val fsm = TrafficLightFSM(trafficLight)
-        stateMachines[name] = fsm
         trafficLightData[name] = trafficLight
     }
 
-    override suspend fun startTrafficLight(name: String) {
-        logger.info { "startTrafficLight:$name:start" }
+    override suspend fun setupTrafficLight(name: String) {
+        logger.info { "setupTrafficLight:$name:start" }
         val trafficLight = trafficLightData[name]
         requireNotNull(trafficLight) { "Expected to find TrafficLight:$name" }
-        val fsm = stateMachines[name]
-        requireNotNull(fsm) { "Expected to find TrafficLightFSM:$name" }
-        fsm.stop()
-        sharedFlowToChannel(trafficLight.stopped, stoppedChannel)
+        sharedFlowToChannel("${trafficLight.name}:stoppedFlow", trafficLight.stopped, stoppedChannel)
         logger.info { "startTrafficLight:$name:end" }
     }
 
     override suspend fun stateChanged(toState: IntersectionStates) {
+        logger.info { "stateChanged:$toState:start" }
         stateChannel.send(toState)
+        logger.info { "stateChanged:$toState:end" }
     }
 
     override fun changeCycleTime(value: Long) {
@@ -106,24 +121,27 @@ class TrafficIntersectionService(
     }
 
     override suspend fun start() {
-        val fsm = stateMachines[currentName]
-        requireNotNull(fsm) { "expected stateMachine for $currentName" }
         logger.info { "$currentState:$currentName:start()" }
-        fsm.start()
+        _currentLight.start()
     }
 
     override suspend fun stop() {
-        val fsm = stateMachines[currentName]
-        requireNotNull(fsm) { "expected stateMachine for $currentName" }
         logger.info { "$currentState:$currentName:stop()" }
-        fsm.stop()
+        _currentLight.stop()
+    }
+
+    override suspend fun on() {
+        logger.info { "$currentState:on()" }
+        trafficLights.forEach {
+            it.on()
+        }
     }
 
     override suspend fun off() {
-        val fsm = stateMachines[currentName]
-        requireNotNull(fsm) { "expected stateMachine for $currentName" }
-        logger.info { "$currentState:$currentName:off()" }
-        fsm.off()
+        logger.info("$currentState:off")
+        trafficLights.forEach {
+            it.off()
+        }
     }
 
     override suspend fun next() {
@@ -132,13 +150,19 @@ class TrafficIntersectionService(
         if (index >= order.size) {
             index = 0
         }
-        _currentName = order[index]
-        logger.info { "$currentState:$oldName -> $currentName" }
+        val name = order[index]
+        logger.info { "$currentState:$oldName -> $name" }
+        _currentLight = requireNotNull(trafficLightData[name])
     }
 
     override suspend fun startSystem() {
         logger.info("startSystem")
         intersectionFSM.startIntersection()
+    }
+
+    override suspend fun onOffSystem() {
+        logger.info("onOffSystem")
+        intersectionFSM.onOffIntersection()
     }
 
     override suspend fun stopSystem() {
@@ -151,9 +175,21 @@ class TrafficIntersectionService(
         intersectionFSM.switchIntersection()
     }
 
-    override suspend fun stopped() {
-        logger.info("stopped")
-        intersectionFSM.stopped()
+    override suspend fun flashSystem() {
+        logger.info("flash")
+        intersectionFSM.flashIntersection()
+    }
+
+    override suspend fun stopAll() {
+        logger.info("offAll")
+        trafficLights.forEach {
+            it.stop()
+        }
+    }
+
+    override suspend fun flashAll() {
+        logger.info("flashAll")
+        trafficLights.forEach { it.flash() }
     }
 
     override fun allowedEvents(): Set<IntersectionEvents> = intersectionFSM.allowedEvents()

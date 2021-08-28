@@ -6,12 +6,10 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
-import com.example.kfsm.compose.traffic.fsm.TrafficIntersectionService
-import com.example.kfsm.compose.traffic.fsm.TrafficLightService
 import io.jumpco.open.kfsm.mpp.example.traffic.App
+import io.jumpco.open.kfsm.mpp.example.traffic.fsm.TrafficIntersectionService
+import io.jumpco.open.kfsm.mpp.example.traffic.fsm.TrafficLightService
 import io.jumpco.open.kfsm.mpp.example.traffic.view.TrafficIntersectionViewModel
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import mu.KotlinLogging
 import kotlin.system.exitProcess
