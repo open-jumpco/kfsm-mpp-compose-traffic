@@ -131,7 +131,4 @@ class TrafficIntersectionViewModel <<viewmodel>> #lightgreen {
 TrafficIntersectionViewModel *--> "1..n" TrafficLightController: trafficLights
 TrafficIntersectionViewModel *--> TrafficIntersectionController: trafficIntersection
 
-class ViewModel <<android>> #green {
-}
-
 @enduml
