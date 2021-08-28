@@ -7,8 +7,29 @@
 
 | <<start>>
 | 
-| STOPPED
+| OFF
 a| 
+
+| OFF
+| ON_OFF
+| STOPPED
+a| [source,kotlin]
+----
+{
+on()
+}
+----
+
+| STOPPED
+| ON_OFF
+| OFF
+a| [source,kotlin]
+----
+{
+logger.info{"STOPPED:ON_OFF"}
+off()
+}
+----
 
 | STOPPED
 | START
@@ -28,6 +49,17 @@ a| [source,kotlin]
 ----
 {
 logger.info{"STOPPED:STOPPED"}
+}
+----
+
+| STOPPED
+| FLASH
+| FLASHING
+a| [source,kotlin]
+----
+{
+logger.info{"STOPPED:FLASH"}
+flashAll()
 }
 ----
 
@@ -70,7 +102,7 @@ stop()
 a| [source,kotlin]
 ----
 {
-logger.info{"STOPPED"}
+logger.info{"STOPPING:STOPPED"}
 }
 ----
 
@@ -80,7 +112,7 @@ logger.info{"STOPPED"}
 a| [source,kotlin]
 ----
 {
-logger.info{"SWITCH"}
+logger.info{"STOPPING:SWITCH"}
 }
 ----
 
@@ -90,7 +122,7 @@ logger.info{"SWITCH"}
 a| [source,kotlin]
 ----
 {
-logger.info{"STOP"}
+logger.info{"STOPPING:STOP"}
 }
 ----
 
@@ -123,7 +155,7 @@ a| [source,kotlin]
 ----
 {
 logger.info{"WAITING:STOP"}
-off()
+stop()
 }
 ----
 
@@ -134,7 +166,6 @@ a| [source,kotlin]
 ----
 {
 logger.info{"WAITING_STOPPED:timeout"}
-off()
 }
 ----
 
@@ -145,7 +176,16 @@ a| [source,kotlin]
 ----
 {
 logger.info{"WAITING_STOPPED:STOPPED:ignore"}
-off()
+}
+----
+
+| FLASHING
+| STOP
+| STOPPED
+a| [source,kotlin]
+----
+{
+stopAll()
 }
 ----
 |===

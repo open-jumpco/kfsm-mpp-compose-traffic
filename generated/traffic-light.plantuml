@@ -8,15 +8,21 @@ skinparam state {
 }
 state TrafficLightFSM {
 [*] --> OFF
-OFF --> GREEN : GO -> {\l  logger.info{"OFF:GO:$name"}\l  switchRed(false)\l  switchGreen(true)\l}
-OFF --> RED : STOP -> {\l  logger.info{"OFF:STOP:$name"}\l  switchRed(true)\l}
+OFF --> RED : ON -> {\l  logger.info{"OFF:ON_OFF:$name"}\l  switchRed(true)\l}
 RED --> GREEN : GO -> {\l  logger.info{"RED:GO:$name"}\l  switchRed(false)\l  switchGreen(true)\l}
 RED --> RED : STOP -> {\l  logger.info{"RED:STOP:$name"}\l  switchGreen(false)\l  switchAmber(false)\l  switchRed(true)\l}
-RED --> OFF : OFF -> {\l  logger.info{"RED:OFF:$name"}\l  switchGreen(false)\l  switchAmber(false)\l  switchRed(true)\l}
+RED --> OFF : OFF -> {\l  logger.info{"RED:ON_OFF:$name"}\l  switchGreen(false)\l  switchAmber(false)\l  switchRed(false)\l}
+RED --> FLASHING_ON : FLASH -> {\l  logger.info{"RED:FLASH:$name"}\l}
 AMBER --> RED : <<timeout = {amberTimeout}>> -> {\l  logger.info{"AMBER:timeout:$name"}\l  switchRed(true)\l  switchAmber(false)\l  setStopped()\l}
 AMBER --> AMBER : STOP -> {\l  logger.info{"AMBER:STOP:$name"}\l}
-AMBER --> OFF : OFF -> {\l  logger.info{"AMBER:OFF:$name"}\l  switchGreen(false)\l  switchAmber(false)\l  switchRed(true)\l}
+AMBER --> OFF : OFF -> {\l  logger.info{"AMBER:ON_OFF:$name"}\l  switchGreen(false)\l  switchAmber(false)\l  switchRed(false)\l}
 GREEN --> AMBER : STOP -> {\l  logger.info{"GREEN:STOP:$name"}\l  switchGreen(false)\l  switchAmber(true)\l}
-GREEN --> OFF : OFF -> {\l  logger.info{"GREEN:OFF:$name"}\l  switchGreen(false)\l  switchAmber(false)\l  switchRed(true)\l}
+GREEN --> OFF : OFF -> {\l  logger.info{"GREEN:OFF:$name"}\l  switchGreen(false)\l  switchAmber(false)\l  switchRed(false)\l}
+FLASHING_ON --> FLASHING_OFF : <<timeout = {flashingOnTimeout}>> -> {\l  switchRed(false)\l}
+FLASHING_ON --> OFF : OFF -> {\l  logger.info{"FLASHING_ON:OFF:$name"}\l  switchGreen(false)\l  switchAmber(false)\l  switchRed(false)\l}
+FLASHING_ON --> RED : STOP -> {\l}
+FLASHING_OFF --> FLASHING_ON : <<timeout = {flashingOffTimeout}>> -> {\l  switchRed(true)\l}
+FLASHING_OFF --> OFF : OFF -> {\l  logger.info{"FLASHING_OFF:OFF:$name"}\l}
+FLASHING_OFF --> RED : STOP -> {\l  switchRed(true)\l}
 }
 @enduml

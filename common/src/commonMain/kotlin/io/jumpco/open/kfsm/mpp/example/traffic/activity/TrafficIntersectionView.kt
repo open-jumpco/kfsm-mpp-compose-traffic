@@ -197,7 +197,7 @@ fun IntersectionState(state: IntersectionStates, viewModel: TrafficIntersectionV
                 withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                     append("${viewModel.cycleWaitTime}ms")
                 }
-                append(", Amber time: ")
+                append("\nAmber time: ")
                 withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                     append("${viewModel.amberTimeout}ms")
                 }

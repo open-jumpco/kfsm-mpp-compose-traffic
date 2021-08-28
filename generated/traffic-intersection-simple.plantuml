@@ -7,9 +7,12 @@ skinparam state {
     FontStyle Bold
 }
 state TrafficIntersectionFSM {
-[*] --> STOPPED
+[*] --> OFF
+OFF --> STOPPED : ON_OFF
+STOPPED --> OFF : ON_OFF
 STOPPED --> GOING : START
 STOPPED --> STOPPED : STOPPED
+STOPPED --> FLASHING : FLASH
 GOING --> STOPPING : <<timeout = {cycleTime}>>
 GOING --> STOPPING : SWITCH
 GOING --> WAITING_STOPPED : STOP
@@ -21,5 +24,6 @@ WAITING --> WAITING : SWITCH
 WAITING --> STOPPED : STOP
 WAITING_STOPPED --> STOPPED : <<timeout = {cycleWaitTime/2}>>
 WAITING_STOPPED --> STOPPED : STOPPED
+FLASHING --> STOPPED : STOP
 }
 @enduml

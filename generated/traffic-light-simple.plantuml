@@ -8,15 +8,21 @@ skinparam state {
 }
 state TrafficLightFSM {
 [*] --> OFF
-OFF --> GREEN : GO
-OFF --> RED : STOP
+OFF --> RED : ON
 RED --> GREEN : GO
 RED --> RED : STOP
 RED --> OFF : OFF
+RED --> FLASHING_ON : FLASH
 AMBER --> RED : <<timeout = {amberTimeout}>>
 AMBER --> AMBER : STOP
 AMBER --> OFF : OFF
 GREEN --> AMBER : STOP
 GREEN --> OFF : OFF
+FLASHING_ON --> FLASHING_OFF : <<timeout = {flashingOnTimeout}>>
+FLASHING_ON --> OFF : OFF
+FLASHING_ON --> RED : STOP
+FLASHING_OFF --> FLASHING_ON : <<timeout = {flashingOffTimeout}>>
+FLASHING_OFF --> OFF : OFF
+FLASHING_OFF --> RED : STOP
 }
 @enduml

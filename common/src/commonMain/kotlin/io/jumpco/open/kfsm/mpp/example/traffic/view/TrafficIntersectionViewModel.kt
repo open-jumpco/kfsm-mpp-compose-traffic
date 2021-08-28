@@ -72,9 +72,9 @@ class TrafficIntersectionViewModel constructor(
             while (true) {
                 val toState = trafficIntersection.state.receive()
                 CoroutineScope(Dispatchers.Main).launch {
+                    determineAllowed()
                     _intersectionState.emit(toState)
                     logger.info { "trafficIntersection.state.collect:$toState" }
-                    determineAllowed()
                 }
             }
         }

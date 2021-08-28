@@ -11,24 +11,12 @@
 a| 
 
 | OFF
-| GO
-| GREEN
-a| [source,kotlin]
-----
-{
-logger.info{"OFF:GO:$name"}
-switchRed(false)
-switchGreen(true)
-}
-----
-
-| OFF
-| STOP
+| ON
 | RED
 a| [source,kotlin]
 ----
 {
-logger.info{"OFF:STOP:$name"}
+logger.info{"OFF:ON_OFF:$name"}
 switchRed(true)
 }
 ----
@@ -64,10 +52,20 @@ switchRed(true)
 a| [source,kotlin]
 ----
 {
-logger.info{"RED:OFF:$name"}
+logger.info{"RED:ON_OFF:$name"}
 switchGreen(false)
 switchAmber(false)
-switchRed(true)
+switchRed(false)
+}
+----
+
+| RED
+| FLASH
+| FLASHING_ON
+a| [source,kotlin]
+----
+{
+logger.info{"RED:FLASH:$name"}
 }
 ----
 
@@ -100,10 +98,10 @@ logger.info{"AMBER:STOP:$name"}
 a| [source,kotlin]
 ----
 {
-logger.info{"AMBER:OFF:$name"}
+logger.info{"AMBER:ON_OFF:$name"}
 switchGreen(false)
 switchAmber(false)
-switchRed(true)
+switchRed(false)
 }
 ----
 
@@ -128,6 +126,68 @@ a| [source,kotlin]
 logger.info{"GREEN:OFF:$name"}
 switchGreen(false)
 switchAmber(false)
+switchRed(false)
+}
+----
+
+| FLASHING_ON
+| \<<timeout = {flashingOnTimeout}>>
+| FLASHING_OFF
+a| [source,kotlin]
+----
+{
+switchRed(false)
+}
+----
+
+| FLASHING_ON
+| OFF
+| OFF
+a| [source,kotlin]
+----
+{
+logger.info{"FLASHING_ON:OFF:$name"}
+switchGreen(false)
+switchAmber(false)
+switchRed(false)
+}
+----
+
+| FLASHING_ON
+| STOP
+| RED
+a| [source,kotlin]
+----
+{
+}
+----
+
+| FLASHING_OFF
+| \<<timeout = {flashingOffTimeout}>>
+| FLASHING_ON
+a| [source,kotlin]
+----
+{
+switchRed(true)
+}
+----
+
+| FLASHING_OFF
+| OFF
+| OFF
+a| [source,kotlin]
+----
+{
+logger.info{"FLASHING_OFF:OFF:$name"}
+}
+----
+
+| FLASHING_OFF
+| STOP
+| RED
+a| [source,kotlin]
+----
+{
 switchRed(true)
 }
 ----
