@@ -1,7 +1,14 @@
 = KFSM MPP Compose Traffic Intersection Demo
 :figure-caption!:
 
+
 This project is an MPP version of https://github.com/open-jumpco/kfsm-android-compose-traffic[kfsm-android-compose-traffic]. It will be extended over time to test the extent of support for various UI mechanisms of Compose across Android, Desktop and Web.
+
+== Screenshots
+
+image:kfsm-mpp-traffic-desktop.png[]
+
+image:kfsm-mpp-traffic-android.png[]
 
 This application demonstrates using 2 state machines to provide a solution.
 The traffic light state machine operates the light and only has a stop and go event. The stop event will switch to amber and after a timeout switch to red and generate a stopped notification.
