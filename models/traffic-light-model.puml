@@ -35,8 +35,8 @@ class TrafficLightFSM <<fsm>> {
     fun stop() <<suspend>>
 }
 
-TrafficLightFSM ..> TrafficLightStates: <<uses>>
-TrafficLightFSM ..> TrafficLightEvents: <<uses>>
+TrafficLightFSM .right.> TrafficLightStates: <<uses>>
+TrafficLightFSM .down.> TrafficLightEvents: <<uses>>
 TrafficLightFSM -left-> TrafficLightContext: context
 
 class TrafficLightService <<context-implementation>> {
@@ -56,7 +56,7 @@ class TrafficLightService <<context-implementation>> {
     stateChanged(toState: TrafficLightStates) <<suspend>>
 }
 
-TrafficLightService --|> TrafficLightController
+TrafficLightService -left--|> TrafficLightController
 TrafficLightService *--> TrafficLightFSM: fsm
 
 @enduml

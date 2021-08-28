@@ -57,7 +57,7 @@ class TrafficLightService <<context-implementation>> {
 }
 
 TrafficLightService --|> TrafficLightController
-TrafficLightService *--> TrafficLightFSM: fsm
+TrafficLightService *---> TrafficLightFSM: fsm
 
 
 enum IntersectionStates <<fsm-state>> {
@@ -118,8 +118,8 @@ interface TrafficIntersectionController {
     switch()
 }
 
-TrafficIntersectionController -|> TrafficIntersectionContext
-TrafficIntersectionController *--> TrafficLightController: trafficLights
+TrafficIntersectionController --|> TrafficIntersectionContext
+TrafficIntersectionController *---> TrafficLightController: trafficLights
 
 class TrafficIntersectionService {
     state: StateFlow<IntersectionStates>
@@ -151,8 +151,9 @@ class TrafficIntersectionService {
 }
 
 TrafficIntersectionService --|> TrafficIntersectionController
-TrafficIntersectionService *--> TrafficIntersectionFSM: intersectionFSM <<private>>
-TrafficIntersectionService *--> "1..n" TrafficLightController: trafficLights <<private>>
+TrafficIntersectionService *---> TrafficIntersectionFSM: intersectionFSM <<private>>
+TrafficIntersectionService *---> "1..n" TrafficLightController: trafficLights <<private>>
+TrafficIntersectionService ...> TrafficLightService
 
 class TrafficIntersectionViewModel <<viewmodel>> #lightgreen {
     val amberTimeout: Long

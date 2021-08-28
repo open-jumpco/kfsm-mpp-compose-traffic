@@ -16,7 +16,7 @@ interface TrafficLightController {
     changeAmberTimeout(value: Long)
 }
 
-TrafficLightController ..> TrafficLightStates
+TrafficLightController .up.> TrafficLightStates
 
 enum IntersectionStates <<fsm-state>> {
     STOPPING
@@ -52,7 +52,7 @@ class TrafficIntersectionFSM <<fsm>> {
 }
 
 TrafficIntersectionFSM --> TrafficIntersectionContext: context
-TrafficIntersectionFSM ..> IntersectionEvents: events <<uses>>
+TrafficIntersectionFSM .right.> IntersectionEvents: events <<uses>>
 TrafficIntersectionFSM ..> IntersectionStates: states <<uses>>
 
 interface TrafficIntersectionController {
@@ -77,7 +77,7 @@ interface TrafficIntersectionController {
     switch()
 }
 
-TrafficIntersectionController -|> TrafficIntersectionContext
+TrafficIntersectionController -right-|> TrafficIntersectionContext
 
 class TrafficIntersectionService {
     state: StateFlow<IntersectionStates>
@@ -110,7 +110,7 @@ class TrafficIntersectionService {
 
 TrafficIntersectionService --|> TrafficIntersectionController
 TrafficIntersectionService *--> TrafficIntersectionFSM: intersectionFSM <<private>>
-TrafficIntersectionService --> TrafficLightController: trafficLights <<private>>
+TrafficIntersectionService -left-> TrafficLightController: trafficLights <<private>>
 
 class TrafficIntersectionViewModel <<viewmodel>> #lightgreen {
     val amberTimeout: Long
@@ -128,7 +128,7 @@ class TrafficIntersectionViewModel <<viewmodel>> #lightgreen {
     switch() <<suspend>>
 }
 
-TrafficIntersectionViewModel *--> "1..n" TrafficLightController: trafficLights
-TrafficIntersectionViewModel *--> TrafficIntersectionController: trafficIntersection
+TrafficIntersectionViewModel *-right-> "1..n" TrafficLightController: trafficLights
+TrafficIntersectionViewModel *---> TrafficIntersectionController: trafficIntersection
 
 @enduml
