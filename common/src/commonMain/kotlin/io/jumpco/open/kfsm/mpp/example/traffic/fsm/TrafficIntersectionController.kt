@@ -1,14 +1,8 @@
 package io.jumpco.open.kfsm.mpp.example.traffic.fsm
 
-import io.jumpco.open.kfsm.mpp.example.traffic.fsm.IntersectionEvents
-import io.jumpco.open.kfsm.mpp.example.traffic.fsm.IntersectionStates
-import io.jumpco.open.kfsm.mpp.example.traffic.fsm.TrafficIntersectionContext
-import io.jumpco.open.kfsm.mpp.example.traffic.fsm.TrafficLightEventHandler
 import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
 
-interface TrafficIntersectionEventHandler : TrafficIntersectionContext {
+interface TrafficIntersectionController : TrafficIntersectionContext {
     val amberTimeout: Long
     val flashOnTimeout: Long
     val flashOffTimeout: Long
@@ -16,15 +10,15 @@ interface TrafficIntersectionEventHandler : TrafficIntersectionContext {
     val stopped: ReceiveChannel<Long>
     val currentName: String
     val listOrder: List<String>
-    val trafficLights: List<TrafficLightEventHandler>
+    val trafficLights: List<TrafficLightController>
     val currentState: IntersectionStates
-    fun get(name: String): TrafficLightEventHandler
+    fun get(name: String): TrafficLightController
     fun changeCycleTime(value: Long)
     fun changeCycleWaitTime(value: Long)
     fun changeAmberTimeout(value: Long)
     fun changeFlashOnTimeout(value: Long)
     fun changeFlashOffTimeout(value: Long)
-    fun addTrafficLight(name: String, trafficLight: TrafficLightEventHandler)
+    fun addTrafficLight(name: String, trafficLight: TrafficLightController)
     fun allowedEvents(): Set<IntersectionEvents>
     suspend fun setupIntersection()
     suspend fun setupTrafficLight(name: String)

@@ -8,18 +8,18 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import mu.KotlinLogging
 
 class TrafficIntersectionService(
-    override val trafficLights: List<TrafficLightEventHandler>
-) : TrafficIntersectionEventHandler {
+    override val trafficLights: List<TrafficLightController>
+) : TrafficIntersectionController {
     companion object {
         private val logger = KotlinLogging.logger {}
     }
 
     private val stateChannel = Channel<IntersectionStates>(1)
     private val stoppedChannel = Channel<Long>(1)
-    private val trafficLightData = mutableMapOf<String, TrafficLightEventHandler>()
+    private val trafficLightData = mutableMapOf<String, TrafficLightController>()
     private val order = mutableListOf<String>()
     private val intersectionFSM = TrafficIntersectionFSM(this)
-    private var _currentLight: TrafficLightEventHandler
+    private var _currentLight: TrafficLightController
 
     private var _cycleWaitTime: Long = 1000L
     private var _cycleTime: Long = 5000L
@@ -86,7 +86,7 @@ class TrafficIntersectionService(
 
     override val listOrder: List<String> get() = order
 
-    override fun get(name: String): TrafficLightEventHandler {
+    override fun get(name: String): TrafficLightController {
         return trafficLightData[name] ?: error("expected trafficLight:$name")
     }
 
@@ -94,7 +94,7 @@ class TrafficIntersectionService(
     override val currentName: String get() = _currentLight.name
     override val cycleWaitTime: Long get() = _cycleWaitTime
 
-    override fun addTrafficLight(name: String, trafficLight: TrafficLightEventHandler) {
+    override fun addTrafficLight(name: String, trafficLight: TrafficLightController) {
         trafficLightData[name] = trafficLight
     }
 

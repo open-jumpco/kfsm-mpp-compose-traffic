@@ -3,17 +3,16 @@ package io.jumpco.open.kfsm.mpp.example.traffic.view
 import androidx.compose.runtime.snapshots.Snapshot
 import io.jumpco.open.kfsm.mpp.example.traffic.fsm.IntersectionEvents
 import io.jumpco.open.kfsm.mpp.example.traffic.fsm.IntersectionStates
-import io.jumpco.open.kfsm.mpp.example.traffic.fsm.TrafficIntersectionEventHandler
-import io.jumpco.open.kfsm.mpp.example.traffic.fsm.TrafficLightEventHandler
+import io.jumpco.open.kfsm.mpp.example.traffic.fsm.TrafficIntersectionController
+import io.jumpco.open.kfsm.mpp.example.traffic.fsm.TrafficLightController
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import mu.KotlinLogging
 
 
 class TrafficIntersectionViewModel constructor(
-    private val trafficIntersection: TrafficIntersectionEventHandler
+    private val trafficIntersection: TrafficIntersectionController
 ) {
     companion object {
         private val logger = KotlinLogging.logger {}
@@ -40,7 +39,7 @@ class TrafficIntersectionViewModel constructor(
     val cycleTime: Long get() = trafficIntersection.cycleTime
     val currentName: String get() = trafficIntersection.currentName
 
-    val trafficLights: List<TrafficLightEventHandler> = trafficIntersection.trafficLights
+    val trafficLights: List<TrafficLightController> = trafficIntersection.trafficLights
 
     private suspend fun determineAllowed() {
         logger.info("determineAllowed")

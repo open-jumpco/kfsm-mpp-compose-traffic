@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import mu.KotlinLogging
 import java.util.concurrent.atomic.AtomicLong
 
-class TrafficLightService(lightName: String) : TrafficLightEventHandler {
+class TrafficLightService(lightName: String) : TrafficLightController {
     companion object {
         private val logger = KotlinLogging.logger {}
     }

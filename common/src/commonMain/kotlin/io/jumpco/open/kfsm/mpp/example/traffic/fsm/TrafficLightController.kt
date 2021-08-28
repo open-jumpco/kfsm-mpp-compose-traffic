@@ -5,7 +5,7 @@ import com.example.kfsm.compose.traffic.fsm.TrafficLightStates
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 
-interface TrafficLightEventHandler : TrafficLightContext {
+interface TrafficLightController : TrafficLightContext {
     val amber: StateFlow<Boolean>
     val red: StateFlow<Boolean>
     val green: StateFlow<Boolean>

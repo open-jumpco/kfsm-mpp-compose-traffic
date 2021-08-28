@@ -15,7 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.jumpco.open.kfsm.mpp.example.traffic.fsm.TrafficLightEventHandler
+import io.jumpco.open.kfsm.mpp.example.traffic.fsm.TrafficLightController
 import io.jumpco.open.kfsm.mpp.example.traffic.Amber
 
 
@@ -33,7 +33,7 @@ fun LightView(
 }
 
 @Composable
-fun TrafficLightView(modifier: Modifier, context: TrafficLightEventHandler) {
+fun TrafficLightView(modifier: Modifier, context: TrafficLightController) {
     Column(
         modifier.drawBehind { drawRect(Color.DarkGray) },
         verticalArrangement = Arrangement.SpaceEvenly,
