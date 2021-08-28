@@ -40,7 +40,7 @@ class MainActivity : AppCompatActivity() {
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        CoroutineScope(Dispatchers.Default).async {
+        CoroutineScope(Dispatchers.Default).launch {
             intersectionViewModel.setupIntersection()
         }
         setContent {
@@ -61,6 +61,5 @@ fun MainWindow() {
             }
         }
     }
-
 }
 

@@ -50,6 +50,7 @@ class TrafficIntersectionViewModel constructor(
     }
 
     suspend fun setupIntersection() {
+        logger.info("setupIntersection:start")
         trafficIntersection.setupIntersection()
         CoroutineScope(Dispatchers.Default).launch {
             trafficIntersection.stopped.collect {
@@ -63,6 +64,7 @@ class TrafficIntersectionViewModel constructor(
         CoroutineScope(Dispatchers.Default).launch {
             determineAllowed()
         }
+        logger.info("setupIntersection:end")
     }
 
     suspend fun startSystem() {
