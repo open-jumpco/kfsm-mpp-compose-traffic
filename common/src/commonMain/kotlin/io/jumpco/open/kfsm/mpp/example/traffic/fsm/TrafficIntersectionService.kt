@@ -2,9 +2,10 @@ package io.jumpco.open.kfsm.mpp.example.traffic.fsm
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.launch
 import mu.KotlinLogging
 
 class TrafficIntersectionService(
@@ -14,8 +15,8 @@ class TrafficIntersectionService(
         private val logger = KotlinLogging.logger {}
     }
 
-    private val stateChannel = Channel<IntersectionStates>(1)
-    private val stoppedChannel = Channel<Long>(1)
+    private val stateChannel = Channel<IntersectionStates>(2, BufferOverflow.DROP_OLDEST)
+    private val stoppedChannel = Channel<Long>(2, BufferOverflow.DROP_OLDEST)
     private val trafficLightData = mutableMapOf<String, TrafficLightController>()
     private val order = mutableListOf<String>()
     private val intersectionFSM = TrafficIntersectionFSM(this)
@@ -34,7 +35,7 @@ class TrafficIntersectionService(
     override val currentState: IntersectionStates get() = intersectionFSM.currentState
 
     init {
-        logger.info("init:start")
+        logger.info { "init:start" }
         require(trafficLights.isNotEmpty()) { "At least one light is required" }
         _currentLight = trafficLights[0]
         trafficLights.forEach {
@@ -44,7 +45,7 @@ class TrafficIntersectionService(
             addTrafficLight(it.name, it)
             order.add(it.name)
         }
-        logger.info("init:end")
+        logger.info { "init:end" }
     }
 
     override fun changeAmberTimeout(value: Long) {
@@ -73,7 +74,7 @@ class TrafficIntersectionService(
         trafficLightData.values.forEach {
             setupTrafficLight(it.name)
         }
-        CoroutineScope(Dispatchers.Default).async {
+        CoroutineScope(Dispatchers.Default).launch {
             while (true) {
                 val event = stopped.receive()
                 logger.info { "stopped:$event" }
@@ -102,7 +103,7 @@ class TrafficIntersectionService(
         logger.info { "setupTrafficLight:$name:start" }
         val trafficLight = trafficLightData[name]
         requireNotNull(trafficLight) { "Expected to find TrafficLight:$name" }
-        sharedFlowToChannel("${trafficLight.name}:stoppedFlow", trafficLight.stopped, stoppedChannel)
+        channelToChannel("stopped$name", trafficLight.stopped, stoppedChannel)
         logger.info { "startTrafficLight:$name:end" }
     }
 
@@ -138,7 +139,7 @@ class TrafficIntersectionService(
     }
 
     override suspend fun off() {
-        logger.info("$currentState:off")
+        logger.info { "$currentState:off" }
         trafficLights.forEach {
             it.off()
         }
@@ -156,39 +157,39 @@ class TrafficIntersectionService(
     }
 
     override suspend fun startSystem() {
-        logger.info("startSystem")
+        logger.info { "startSystem" }
         intersectionFSM.startIntersection()
     }
 
     override suspend fun onOffSystem() {
-        logger.info("onOffSystem")
+        logger.info { "onOffSystem" }
         intersectionFSM.onOffIntersection()
     }
 
     override suspend fun stopSystem() {
-        logger.info("stopSystem")
+        logger.info { "stopSystem" }
         intersectionFSM.stopIntersection()
     }
 
     override suspend fun switch() {
-        logger.info("switch")
+        logger.info { "switch" }
         intersectionFSM.switchIntersection()
     }
 
     override suspend fun flashSystem() {
-        logger.info("flash")
+        logger.info { "flash" }
         intersectionFSM.flashIntersection()
     }
 
     override suspend fun stopAll() {
-        logger.info("offAll")
+        logger.info { "offAll" }
         trafficLights.forEach {
             it.stop()
         }
     }
 
     override suspend fun flashAll() {
-        logger.info("flashAll")
+        logger.info { "flashAll" }
         trafficLights.forEach { it.flash() }
     }
 

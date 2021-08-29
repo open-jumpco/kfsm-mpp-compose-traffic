@@ -67,9 +67,12 @@ class TrafficLightFSM(context: TrafficLightContext) {
                 }
                 onEvent(TrafficLightEvents.OFF to TrafficLightStates.OFF) {
                     logger.info { "AMBER:ON_OFF:$name" }
-                    switchGreen(false)
                     switchAmber(false)
-                    switchRed(false)
+                }
+                onEvent(TrafficLightEvents.FLASH to TrafficLightStates.FLASHING_ON) {
+                    logger.info { "AMBER:FLASH:$name" }
+                    switchAmber(false)
+                    switchRed(true)
                 }
             }
             whenState(TrafficLightStates.GREEN) {
@@ -84,8 +87,11 @@ class TrafficLightFSM(context: TrafficLightContext) {
                 onEvent(TrafficLightEvents.OFF to TrafficLightStates.OFF) {
                     logger.info { "GREEN:OFF:$name" }
                     switchGreen(false)
-                    switchAmber(false)
-                    switchRed(false)
+                }
+                onEvent(TrafficLightEvents.FLASH to TrafficLightStates.FLASHING_ON) {
+                    logger.info { "GREEN:FLASH:$name" }
+                    switchGreen(false)
+                    switchRed(true)
                 }
             }
             whenState(TrafficLightStates.FLASHING_ON) {
@@ -122,7 +128,7 @@ class TrafficLightFSM(context: TrafficLightContext) {
     }
 
     private val fsm = definition.create(context)
-
+    val currentState: TrafficLightStates get() = fsm.currentState
     suspend fun start() {
         fsm.sendEvent(TrafficLightEvents.GO)
     }

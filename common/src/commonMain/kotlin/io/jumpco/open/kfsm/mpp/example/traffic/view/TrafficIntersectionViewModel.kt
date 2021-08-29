@@ -1,13 +1,13 @@
 package io.jumpco.open.kfsm.mpp.example.traffic.view
 
 import androidx.compose.runtime.snapshots.Snapshot
-import io.jumpco.open.kfsm.mpp.example.traffic.fsm.IntersectionEvents
-import io.jumpco.open.kfsm.mpp.example.traffic.fsm.IntersectionStates
-import io.jumpco.open.kfsm.mpp.example.traffic.fsm.TrafficIntersectionController
-import io.jumpco.open.kfsm.mpp.example.traffic.fsm.TrafficLightController
-import kotlinx.coroutines.*
+import io.jumpco.open.kfsm.mpp.example.traffic.fsm.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.withContext
 import mu.KotlinLogging
 
 
@@ -24,8 +24,8 @@ class TrafficIntersectionViewModel constructor(
     private val _allowStop = MutableStateFlow(false)
     private val _allowFlash = MutableStateFlow(false)
     private val _allowOnOff = MutableStateFlow(false)
-    private val _intersectionState = MutableStateFlow<IntersectionStates>(IntersectionStates.OFF)
-    val intersectionState: StateFlow<IntersectionStates> get() = _intersectionState
+    private val _intersectionState = MutableSharedFlow<IntersectionStates>()
+    val intersectionState: SharedFlow<IntersectionStates> get() = _intersectionState
     val currentState: IntersectionStates get() = trafficIntersection.currentState
     val allowStart: StateFlow<Boolean> get() = _allowStart
     val allowSwitch: StateFlow<Boolean> get() = _allowSwitch
@@ -42,7 +42,7 @@ class TrafficIntersectionViewModel constructor(
     val trafficLights: List<TrafficLightController> = trafficIntersection.trafficLights
 
     private suspend fun determineAllowed() {
-        logger.info("determineAllowed")
+        logger.info { "determineAllowed" }
         val allowedEvents = trafficIntersection.allowedEvents()
         val allowedStart = allowedEvents.contains(IntersectionEvents.START)
         val allowedSwitch = allowedEvents.contains(IntersectionEvents.SWITCH)
@@ -64,20 +64,20 @@ class TrafficIntersectionViewModel constructor(
     }
 
     suspend fun setupIntersection() {
-        logger.info("setupIntersection:start")
+        logger.info { "setupIntersection:start" }
         trafficIntersection.setupIntersection()
         determineAllowed()
-        CoroutineScope(Dispatchers.Default).launch {
-            while (true) {
-                val toState = trafficIntersection.state.receive()
-                CoroutineScope(Dispatchers.Main).launch {
-                    determineAllowed()
-                    _intersectionState.emit(toState)
-                    logger.info { "trafficIntersection.state.collect:$toState" }
-                }
-            }
+        channelToSharedFlow(
+            "intersectionState",
+            trafficIntersection.state,
+            _intersectionState,
+            Dispatchers.Main
+        ) { toState ->
+            logger.info { "trafficIntersection.state.collect:$toState" }
+            determineAllowed()
+
         }
-        logger.info("setupIntersection:end")
+        logger.info { "setupIntersection:end" }
     }
 
 
@@ -90,7 +90,7 @@ class TrafficIntersectionViewModel constructor(
             }
             snapshot.apply()
         } catch (x: Throwable) {
-            logger.error("onOffSystem:$x", x)
+            logger.error(x) { "onOffSystem:$x" }
             snapshot.dispose()
             throw x
         }
@@ -105,7 +105,7 @@ class TrafficIntersectionViewModel constructor(
             }
             snapshot.apply()
         } catch (x: Throwable) {
-            logger.error("startSystem:$x", x)
+            logger.error(x) { "startSystem:$x" }
             snapshot.dispose()
             throw x
         }
@@ -120,7 +120,7 @@ class TrafficIntersectionViewModel constructor(
             }
             snapshot.apply()
         } catch (x: Throwable) {
-            logger.error("stopSystem:$x", x)
+            logger.error(x) { "stopSystem:$x" }
             snapshot.dispose()
             throw x
         }
@@ -134,21 +134,21 @@ class TrafficIntersectionViewModel constructor(
                 trafficIntersection.switch()
             }
         } catch (x: Throwable) {
-            logger.error("switch:$x", x)
+            logger.error(x) { "switch:$x" }
             snapshot.dispose()
             throw x
         }
     }
 
     suspend fun flashSystem() {
-        logger.info("flash")
+        logger.info { "flash" }
         val snapshot = Snapshot.takeMutableSnapshot()
         try {
             snapshot.enter {
                 trafficIntersection.flashSystem()
             }
         } catch (x: Throwable) {
-            logger.error("flash:$x", x)
+            logger.error(x) { "flash:$x" }
             snapshot.dispose()
             throw x
         }

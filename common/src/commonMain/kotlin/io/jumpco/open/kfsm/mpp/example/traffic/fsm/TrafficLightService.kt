@@ -2,10 +2,10 @@ package io.jumpco.open.kfsm.mpp.example.traffic.fsm
 
 import com.example.kfsm.compose.traffic.fsm.TrafficLightStates
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import mu.KotlinLogging
 import java.util.concurrent.atomic.AtomicLong
@@ -16,40 +16,36 @@ class TrafficLightService(lightName: String) : TrafficLightController {
     }
 
     private val fsm = TrafficLightFSM(this)
-    private val amberChannel = Channel<Boolean>(1)
-    private val redChannel = Channel<Boolean>(1)
-    private val greenChannel = Channel<Boolean>(1)
-    private val stateChannel = Channel<TrafficLightStates>(1)
-    private val stoppedChannel = Channel<Long>(1)
+    private val amberChannel = Channel<Boolean>(2, BufferOverflow.DROP_OLDEST)
+    private val redChannel = Channel<Boolean>(2, BufferOverflow.DROP_OLDEST)
+    private val greenChannel = Channel<Boolean>(2, BufferOverflow.DROP_OLDEST)
+    private val stateChannel = Channel<TrafficLightStates>(2, BufferOverflow.DROP_OLDEST)
+    private val stoppedChannel = Channel<Long>(2, BufferOverflow.DROP_OLDEST)
     private var _amber = MutableStateFlow(false)
     private var _red = MutableStateFlow(false)
     private var _green = MutableStateFlow(false)
-    private val _state = MutableStateFlow(TrafficLightStates.OFF)
     private val _counter = AtomicLong(1)
-    private val _stopped = MutableSharedFlow<Long>()
     private var amberTimeoutValue: Long = 2000L
     private var flashingOnTimeoutValue: Long = 600L
     private var flashingOffTimeoutValue: Long = 400L
     override val flashingOnTimeout: Long get() = flashingOnTimeoutValue
     override val flashingOffTimeout: Long get() = flashingOffTimeoutValue
-
+    override val currentState: TrafficLightStates get() = fsm.currentState
     override val name: String = lightName
     override val amberTimeout: Long get() = amberTimeoutValue
     override val amber: StateFlow<Boolean> get() = _amber
     override val red: StateFlow<Boolean> get() = _red
     override val green: StateFlow<Boolean> get() = _green
-    override val stopped: SharedFlow<Long> get() = _stopped
-    override val state: StateFlow<TrafficLightStates> get() = _state
+    override val stopped: ReceiveChannel<Long> get() = stoppedChannel
+    override val state: ReceiveChannel<TrafficLightStates> get() = stateChannel
 
 
     init {
-        logger.info("init:start")
+        logger.info { "init:start" }
         channelToStateFlow("$name:amberChannel", amberChannel, _amber, Dispatchers.Main)
         channelToStateFlow("$name:redChannel", redChannel, _red, Dispatchers.Main)
         channelToStateFlow("$name:greenChannel", greenChannel, _green, Dispatchers.Main)
-        channelToStateFlow("$name:stateChannel", stateChannel, _state, Dispatchers.Main)
-        channelToSharedFlow("$name:stoppedChannel", stoppedChannel, _stopped, Dispatchers.Main)
-        logger.info("init:end")
+        logger.info { "init:end" }
     }
 
     override fun changeAmberTimeout(value: Long) {
@@ -116,6 +112,7 @@ class TrafficLightService(lightName: String) : TrafficLightController {
         logger.info { "on:$name" }
         fsm.on()
     }
+
     override suspend fun off() {
         logger.info { "off:$name" }
         fsm.off()

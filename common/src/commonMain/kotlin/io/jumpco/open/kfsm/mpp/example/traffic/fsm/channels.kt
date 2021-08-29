@@ -14,7 +14,7 @@ fun <T> channelToStateFlow(
     name: String,
     channel: ReceiveChannel<T>,
     flow: MutableStateFlow<T>,
-    dispatcher: CoroutineDispatcher = Dispatchers.Default
+    dispatcher: CoroutineDispatcher = Dispatchers.Main
 ) {
     CoroutineScope(Dispatchers.Default).launch {
         while (true) {
@@ -28,11 +28,12 @@ fun <T> channelToStateFlow(
     }
 }
 
-fun <T> channelToSharedFlow(
+fun <T> channelToStateFlow(
     name: String,
     channel: ReceiveChannel<T>,
-    flow: MutableSharedFlow<T>,
-    dispatcher: CoroutineDispatcher = Dispatchers.Default
+    flow: MutableStateFlow<T>,
+    dispatcher: CoroutineDispatcher,
+    action: suspend (T) -> Unit
 ) {
     CoroutineScope(Dispatchers.Default).launch {
         while (true) {
@@ -41,6 +42,64 @@ fun <T> channelToSharedFlow(
             CoroutineScope(dispatcher).launch {
                 flow.emit(result)
                 logger.info { "emitted:$name:$result" }
+                action.invoke(result)
+            }
+        }
+    }
+}
+
+fun <T> channelToSharedFlow(
+    name: String,
+    channel: ReceiveChannel<T>,
+    flow: MutableSharedFlow<T>,
+    dispatcher: CoroutineDispatcher = Dispatchers.Main
+) {
+    CoroutineScope(Dispatchers.Default).launch {
+        while (true) {
+            val result = channel.receive()
+            logger.info { "received:$name:$result" }
+            CoroutineScope(dispatcher).launch {
+                flow.emit(result)
+                logger.info { "emitted:$name:$result" }
+            }
+        }
+    }
+}
+
+fun <T> channelToChannel(
+    name: String,
+    receiveChannel: ReceiveChannel<T>,
+    sendChannel: SendChannel<T>,
+    dispatcher: CoroutineDispatcher = Dispatchers.Default
+) {
+    CoroutineScope(Dispatchers.Default).launch {
+        while (true) {
+            val result = receiveChannel.receive()
+            logger.info { "received:$name:$result" }
+            CoroutineScope(dispatcher).launch {
+                logger.info { "sending:$name:$result" }
+                sendChannel.send(result)
+                logger.info { "sent:$name:$result" }
+            }
+        }
+    }
+}
+
+fun <T> channelToSharedFlow(
+    name: String,
+    channel: ReceiveChannel<T>,
+    flow: MutableSharedFlow<T>,
+    dispatcher: CoroutineDispatcher,
+    action: suspend (T) -> Unit
+) {
+    CoroutineScope(Dispatchers.Default).launch {
+        while (true) {
+            val result = channel.receive()
+            logger.info { "received:$name:$result" }
+            CoroutineScope(dispatcher).launch {
+                flow.emit(result)
+                logger.info { "emitted:$name:$result" }
+                action.invoke(result)
             }
         }
     }
