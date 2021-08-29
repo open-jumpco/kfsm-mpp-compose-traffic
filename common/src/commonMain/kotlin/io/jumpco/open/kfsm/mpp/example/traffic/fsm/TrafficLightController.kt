@@ -6,6 +6,7 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.flow.StateFlow
 
 interface TrafficLightController : TrafficLightContext {
+    val currentState: TrafficLightStates
     val amber: StateFlow<Boolean>
     val red: StateFlow<Boolean>
     val green: StateFlow<Boolean>

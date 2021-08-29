@@ -21,16 +21,18 @@ interface TrafficLightContext <<fsm-context>> {
 }
 
 interface TrafficLightController {
+    currentState: TrafficLightStates
     amber: StateFlow<Boolean>
     red: StateFlow<Boolean>
     green: StateFlow<Boolean>
-    stopped: SharedFlow<Long>
-    state: StateFlow<TrafficLightStates>
+    stopped: ReceiveChannel<Long>
+    state: ReceiveChannel<TrafficLightStates>
     changeAmberTimeout(value: Long)
 }
 TrafficLightController -down-|> TrafficLightContext
 
 class TrafficLightFSM <<fsm>> {
+    currentState: TrafficLightStates
     fun start() <<suspend>>
     fun stop() <<suspend>>
 }
@@ -45,8 +47,8 @@ class TrafficLightService <<context-implementation>> {
     amber: StateFlow<Boolean>
     red: StateFlow<Boolean>
     green: StateFlow<Boolean>
-    stopped: SharedFlow<Long>
-    state: StateFlow<TrafficLightStates>
+    stopped: ReceiveChannel<Long>
+    state: ReceiveChannel<TrafficLightStates>
     changeAmberTimeout(value: Long)
 
     setStopped() <<suspend>>

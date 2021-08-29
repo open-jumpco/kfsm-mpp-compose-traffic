@@ -22,7 +22,6 @@ interface TrafficLightContext {
     val amberTimeout: Long
     val flashingOnTimeout: Long
     val flashingOffTimeout: Long
-    val currentState: TrafficLightStates
     suspend fun setStopped()
     suspend fun switchRed(on: Boolean)
     suspend fun switchAmber(on: Boolean)

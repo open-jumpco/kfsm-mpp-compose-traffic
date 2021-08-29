@@ -7,12 +7,13 @@ enum TrafficLightStates <<fsm-state>> {
 }
 
 interface TrafficLightController {
-    name: String
+    name: String <<inherited>>
+    currentState: TrafficLightStates
     amber: StateFlow<Boolean>
     red: StateFlow<Boolean>
     green: StateFlow<Boolean>
-    stopped: SharedFlow<Long>
-    state: StateFlow<TrafficLightStates>
+    stopped: ReceiveChannel<Long>
+    state: ReceiveChannel<TrafficLightStates>
     changeAmberTimeout(value: Long)
 }
 
@@ -57,8 +58,8 @@ TrafficIntersectionFSM ..> IntersectionStates: states <<uses>>
 
 interface TrafficIntersectionController {
     amberTimeout: Long
-    state: StateFlow<IntersectionStates>
-    stopped: SharedFlow<Long>
+    state: ReceiveChannel<IntersectionStates>
+    stopped: ReceiveChannel<Long>
     currentName: String
     current: TrafficLightContext
     listOrder: List<String>
@@ -80,8 +81,8 @@ interface TrafficIntersectionController {
 TrafficIntersectionController -right-|> TrafficIntersectionContext
 
 class TrafficIntersectionService {
-    state: StateFlow<IntersectionStates>
-    stopped: SharedFlow<Long>
+    state: ReceiveChannel<IntersectionStates>
+    stopped: ReceiveChannel<Long>
     amberTimeout: Long
     changeAmberTimeout(value: Long)
     setupIntersection()
@@ -118,7 +119,7 @@ class TrafficIntersectionViewModel <<viewmodel>> #lightgreen {
     val cycleTime: Long
     val currentName: String
 
-    val intersectionState: StateFlow<IntersectionStates>
+    val intersectionState: SharedFlow<IntersectionStates>
     val allowStart: StateFlow<Boolean>
     val allowSwitch: StateFlow<Boolean>
     val allowStop: StateFlow<Boolean>
