@@ -11,10 +11,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
-import io.jumpco.open.kfsm.mpp.example.traffic.activity.Intersection
+import io.jumpco.open.kfsm.mpp.example.traffic.view.Intersection
 import io.jumpco.open.kfsm.mpp.example.traffic.fsm.TrafficIntersectionService
 import io.jumpco.open.kfsm.mpp.example.traffic.fsm.TrafficLightService
-import io.jumpco.open.kfsm.mpp.example.traffic.view.TrafficIntersectionViewModel
+import io.jumpco.open.kfsm.mpp.example.traffic.model.TrafficIntersectionViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

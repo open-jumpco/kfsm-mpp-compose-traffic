@@ -9,7 +9,7 @@ import androidx.compose.ui.window.application
 import io.jumpco.open.kfsm.mpp.example.traffic.App
 import io.jumpco.open.kfsm.mpp.example.traffic.fsm.TrafficIntersectionService
 import io.jumpco.open.kfsm.mpp.example.traffic.fsm.TrafficLightService
-import io.jumpco.open.kfsm.mpp.example.traffic.view.TrafficIntersectionViewModel
+import io.jumpco.open.kfsm.mpp.example.traffic.model.TrafficIntersectionViewModel
 import kotlinx.coroutines.launch
 import mu.KotlinLogging
 import kotlin.system.exitProcess
