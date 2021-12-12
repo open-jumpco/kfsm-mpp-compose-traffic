@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import mu.KotlinLogging
 
-val logger = KotlinLogging.logger {}
+private val logger = KotlinLogging.logger {}
 fun <T> channelToStateFlow(
     name: String,
     channel: ReceiveChannel<T>,

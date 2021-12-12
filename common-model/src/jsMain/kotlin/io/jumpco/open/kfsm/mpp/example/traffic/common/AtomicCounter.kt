@@ -13,7 +13,7 @@ actual class AtomicCounter actual constructor(value: Long) {
     }
 
     actual fun incrementAndGet(): Long = ++counter
-    actual fun addAndGet(delta: Long): Long = {
+    actual fun addAndGet(delta: Long): Long {
         counter += delta
         return counter
     }

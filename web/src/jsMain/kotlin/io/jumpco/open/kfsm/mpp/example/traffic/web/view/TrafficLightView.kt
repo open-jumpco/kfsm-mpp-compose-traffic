@@ -1,69 +1,71 @@
+@file:Suppress("FunctionName")
+
 package io.jumpco.open.kfsm.mpp.example.traffic.web.view
 
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import io.jumpco.open.kfsm.mpp.example.traffic.fsm.TrafficLightController
-import io.jumpco.open.kfsm.mpp.example.traffic.Amber
+import io.jumpco.open.kfsm.mpp.example.traffic.web.Amber
+import io.jumpco.open.kfsm.mpp.example.traffic.web.Green
+import io.jumpco.open.kfsm.mpp.example.traffic.web.Red
+import org.jetbrains.compose.web.ExperimentalComposeWebSvgApi
+import org.jetbrains.compose.web.css.*
+import org.jetbrains.compose.web.dom.Div
+import org.jetbrains.compose.web.dom.Text
+import org.jetbrains.compose.web.svg.Circle
+import org.jetbrains.compose.web.svg.Svg
 
-
+@OptIn(ExperimentalComposeWebSvgApi::class)
+@ExperimentalComposeWebSvgApi
 @Composable
 fun LightView(
-    modifier: Modifier,
-    interior: Color,
+    interior: CSSColorValue,
     state: State<Boolean>
 ) {
-    val color = if (state.value) interior else Color.Black
-    Canvas(modifier) {
-        val center = Offset(size.width / 2, size.height / 2)
-        drawCircle(color, size.minDimension / 4, center)
+    val color = if (state.value) interior else Color.black
+    Svg(viewBox = "0 0 200 200") {
+        Circle(100, 100, 80, attrs = {
+            attr("fill", color.toString())
+        })
     }
 }
 
+@OptIn(ExperimentalComposeWebSvgApi::class)
 @Composable
-fun TrafficLightView(modifier: Modifier, context: TrafficLightController) {
-    Column(
-        modifier.drawBehind { drawRect(Color.DarkGray) },
-        verticalArrangement = Arrangement.SpaceEvenly,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        val lightModifier = Modifier.fillMaxWidth(1f)
-            .aspectRatio(1f)
-            .weight(1f)
-            .padding(4.dp)
-        Text(
-            text = context.name,
-            modifier = lightModifier.wrapContentHeight(),
-            color = Color.White,
-            fontSize = 24.sp,
-            textAlign = TextAlign.Center,
-            fontWeight = FontWeight.Bold
-        )
+fun TrafficLightView(context: TrafficLightController) {
+    Div({
+        style {
+            padding(1.em)
+            backgroundColor(Color.darkgray)
+            display(DisplayStyle.Flex)
+            flexDirection(FlexDirection.Column)
+            alignItems(AlignItems.Center)
+            alignContent(AlignContent.SpaceEvenly)
+        }
+    }) {
+        Div({
+            style {
+                maxWidth(100.percent)
+                padding(1.em)
+                fontSize(2.em)
+                color(Color.white)
+                textAlign("center")
+                fontWeight("bold")
+            }
+        }) {
+            Text(context.name)
+        }
         LightView(
-            lightModifier,
-            Color.Red,
+            Red,
             context.red.collectAsState(false)
         )
         LightView(
-            lightModifier,
             Amber,
             context.amber.collectAsState(false)
         )
         LightView(
-            lightModifier,
-            Color.Green,
+            Green,
             context.green.collectAsState(false)
         )
     }

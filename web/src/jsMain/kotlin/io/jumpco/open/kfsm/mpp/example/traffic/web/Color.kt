@@ -1,5 +1,7 @@
 package io.jumpco.open.kfsm.mpp.example.traffic.web
 
-import androidx.compose.ui.graphics.Color
+import org.jetbrains.compose.web.css.Color
 
-val Amber = Color(0xFFFFBF00)
+val Red = Color.red
+val Amber = Color.darkorange
+val Green = Color.green
