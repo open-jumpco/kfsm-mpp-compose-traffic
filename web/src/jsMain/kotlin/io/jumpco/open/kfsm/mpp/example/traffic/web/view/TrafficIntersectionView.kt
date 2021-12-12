@@ -36,7 +36,6 @@ fun StateButton(
                 backgroundColor(Color.lightgray)
                 color(Color.darkgray)
             }
-            flexGrow(1)
         }
         if (!allow) {
             this.disabled();
@@ -79,7 +78,7 @@ fun IntersectionControls(
                 display(DisplayStyle.Flex)
                 flexDirection(FlexDirection.Row)
                 flexWrap(FlexWrap.Wrap)
-                justifyContent(JustifyContent.SpaceEvenly)
+                justifyContent(JustifyContent.SpaceAround)
                 alignItems(AlignItems.Center)
             }
         }) {
@@ -154,7 +153,7 @@ fun IntersectionControls(
                     display(DisplayStyle.Flex)
                     flexDirection(FlexDirection.Row)
                     alignContent(AlignContent.SpaceEvenly)
-                    // alignItems(AlignItems.Center)
+                    alignItems(AlignItems.Center)
                 }
             }) {
                 StateButton(
@@ -180,7 +179,7 @@ fun IntersectionControls(
                     display(DisplayStyle.Flex)
                     flexDirection(FlexDirection.Row)
                     alignContent(AlignContent.SpaceEvenly)
-                    // alignItems(AlignItems.FlexStart)
+                    alignItems(AlignItems.FlexStart)
                 }
             }) {
                 StateButton(
@@ -219,32 +218,33 @@ fun IntersectionState(
             minWidth(width)
             maxHeight(height)
             minHeight(height)
-            display(DisplayStyle.Flex)
-            flexDirection(FlexDirection.Row)
-            flexWrap(FlexWrap.Wrap)
-            alignContent(AlignContent.Start)
-            alignItems(AlignItems.Start)
+            fontSize(1.5.em)
+            alignSelf(AlignSelf.Start)
         }
     }) {
-        Span { Text("State: ") }
-        B { Text(state.name) }
-        Span { Text(", Active: ") }
-        B { Text(viewModel.currentName) }
-        Span { Text(", Cycle time: ") }
-        B { Text("${viewModel.cycleTime}ms") }
-        Span { Text(", Wait time: ") }
-        B { Text("${viewModel.cycleWaitTime}ms") }
-        Span { Text(", Amber time: ") }
-        B { Text("${viewModel.amberTimeout}ms") }
-        Span { Text(", Flash On time: ") }
-        B { Text("${viewModel.flashOnTimeout}ms") }
-        Span { Text(", Flash Off time: ") }
-        B { Text("${viewModel.flashOffTimeout}ms") }
+        P {
+            Span { Text("State: ") }
+            B { Text(state.name) }
+            Span { Text(", Active: ") }
+            B { Text(viewModel.currentName) }
+            Br()
+            Span { Text("Cycle time: ") }
+            B { Text("${viewModel.cycleTime}ms") }
+            Span { Text(", Wait time: ") }
+            B { Text("${viewModel.cycleWaitTime}ms") }
+            Br()
+            Span { Text("Amber time: ") }
+            B { Text("${viewModel.amberTimeout}ms") }
+            Span { Text(", Flash On time: ") }
+            B { Text("${viewModel.flashOnTimeout}ms") }
+            Span { Text(", Flash Off time: ") }
+            B { Text("${viewModel.flashOffTimeout}ms") }
+        }
     }
 }
 
 @Composable
-fun Trafflights(grow: Number, width: CSSNumeric, height: CSSNumeric, trafficLights: List<TrafficLightController>) {
+fun TrafficLights(grow: Number, width: CSSNumeric, height: CSSNumeric, trafficLights: List<TrafficLightController>) {
     Div({
         id("lights")
         style {
@@ -256,9 +256,9 @@ fun Trafflights(grow: Number, width: CSSNumeric, height: CSSNumeric, trafficLigh
             minWidth(width)
             flexGrow(grow)
             backgroundColor(Color.darkslategray)
-            alignContent(AlignContent.SpaceBetween)
+            alignContent(AlignContent.Center)
             justifyContent(JustifyContent.SpaceEvenly)
-            alignItems(AlignItems.Stretch)
+            alignItems(AlignItems.Center)
         }
     }) {
         trafficLights.forEach {
@@ -282,8 +282,8 @@ fun Intersection(viewModel: TrafficIntersectionViewModel, portraitMode: Boolean)
     val state = viewModel.intersectionState.collectAsState(viewModel.currentState)
     if (portraitMode) {
         PortraitContainer {
-            IntersectionState(1, 100.percent, 10.percent, state.value, viewModel)
-            Trafflights(6, 100.percent, 60.percent, viewModel.trafficLights)
+            IntersectionState(2, 100.percent, 20.percent, state.value, viewModel)
+            TrafficLights(5, 100.percent, 50.percent, viewModel.trafficLights)
             IntersectionControls(
                 3,
                 100.percent,
@@ -309,17 +309,17 @@ fun Intersection(viewModel: TrafficIntersectionViewModel, portraitMode: Boolean)
                     alignContent(AlignContent.SpaceEvenly)
                 }
             }) {
-                IntersectionState(2, 100.percent, 20.percent, state.value, viewModel)
+                IntersectionState(3, 100.percent, 30.percent, state.value, viewModel)
                 IntersectionControls(
-                    8,
+                    7,
                     100.percent,
-                    80.percent,
+                    70.percent,
                     viewModel,
                     portraitMode,
                     coroutineScope
                 )
             }
-            Trafflights(1, 50.percent, 100.percent, viewModel.trafficLights)
+            TrafficLights(1, 50.percent, 100.percent, viewModel.trafficLights)
         }
     }
 }
