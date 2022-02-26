@@ -255,10 +255,11 @@ fun TrafficLights(grow: Number, width: CSSNumeric, height: CSSNumeric, trafficLi
             maxWidth(width)
             minWidth(width)
             flexGrow(grow)
+            marginLeft(2.em)
+            marginRight(2.em)
+            marginTop(1.em)
+            marginBottom(1.em)
             backgroundColor(Color.darkslategray)
-            alignContent(AlignContent.Center)
-            justifyContent(JustifyContent.SpaceEvenly)
-            alignItems(AlignItems.Center)
         }
     }) {
         trafficLights.forEach {
@@ -266,6 +267,7 @@ fun TrafficLights(grow: Number, width: CSSNumeric, height: CSSNumeric, trafficLi
                 id("light-${it.name}")
                 style {
                     flexGrow(1)
+                    margin(1.em)
                     alignSelf(AlignSelf.Center)
                     padding(1.em)
                 }
