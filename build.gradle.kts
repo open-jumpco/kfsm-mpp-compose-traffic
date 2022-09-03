@@ -1,19 +1,11 @@
 import io.jumpco.open.kfsm.gradle.VizPluginExtension
-buildscript {
-    repositories {
-        mavenLocal()
-        google()
-        mavenCentral()
-        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
-    }
-
-    dependencies {
-        classpath("org.jetbrains.compose:compose-gradle-plugin:1.0.1")
-        classpath("com.android.tools.build:gradle:4.2.2")
-        classpath(kotlin("gradle-plugin", version = "1.6.10"))
-    }
-}
 plugins {
+    kotlin("jvm") apply false
+    kotlin("multiplatform") apply false
+    kotlin("android") apply false
+    id("com.android.application") apply false
+    id("com.android.library") apply false
+    id("org.jetbrains.compose") apply false
     id("io.jumpco.open.kfsm.viz-plugin") version "1.5.2.4"
 }
 group = "io.jumpco.open.kfsm.mpp.example.traffic"

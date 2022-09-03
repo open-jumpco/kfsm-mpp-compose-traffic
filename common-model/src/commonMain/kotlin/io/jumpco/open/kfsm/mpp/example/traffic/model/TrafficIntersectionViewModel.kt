@@ -2,6 +2,7 @@ package io.jumpco.open.kfsm.mpp.example.traffic.model
 
 import androidx.compose.runtime.snapshots.Snapshot
 import io.jumpco.open.kfsm.mpp.example.traffic.fsm.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,7 +13,9 @@ import mu.KotlinLogging
 
 
 class TrafficIntersectionViewModel constructor(
-    private val trafficIntersection: TrafficIntersectionController
+    private val trafficIntersection: TrafficIntersectionController,
+    private val uiCoroutineScope: CoroutineScope,
+    private val coroutineScope: CoroutineScope
 ) {
     companion object {
         private val logger = KotlinLogging.logger {}
@@ -71,7 +74,8 @@ class TrafficIntersectionViewModel constructor(
             "intersectionState",
             trafficIntersection.state,
             _intersectionState,
-            Dispatchers.Main
+            uiCoroutineScope,
+            coroutineScope
         ) { toState ->
             logger.info { "trafficIntersection.state.collect:$toState" }
             determineAllowed()

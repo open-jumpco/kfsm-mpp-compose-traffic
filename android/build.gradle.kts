@@ -4,6 +4,8 @@ plugins {
     id("org.jetbrains.compose")
 }
 
+val coroutinesVersion: String by project
+
 android {
     compileSdkVersion(31)
 
@@ -19,7 +21,9 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
 }
-
+configurations {
+    // all.exclude
+}
 dependencies {
     implementation(project(":common-model"))
     implementation(project(":common-ui"))
@@ -28,6 +32,8 @@ dependencies {
     implementation(compose.uiTooling)
     implementation("androidx.activity:activity-compose:1.3.1")
     implementation("io.github.microutils:kotlin-logging-jvm:2.0.13")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
+
 
 }
 

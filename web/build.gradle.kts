@@ -7,6 +7,8 @@ plugins {
     id("org.jetbrains.compose")
 }
 
+val coroutinesVersion: String by project
+
 kotlin {
     js(IR) {
         browser {
@@ -27,6 +29,8 @@ kotlin {
                 implementation(compose.runtime)
                 implementation(project(":common-model"))
                 implementation("io.github.microutils:kotlin-logging-js:2.0.13")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-js:$coroutinesVersion")
+
 
 //                implementation(npm("copy-webpack-plugin", "^10.0.0"))
 //                implementation(npm("@material/theme", "^13.0.0"))

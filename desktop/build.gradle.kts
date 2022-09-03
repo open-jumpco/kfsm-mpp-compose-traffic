@@ -7,10 +7,12 @@ plugins {
     id("org.jetbrains.compose")
 }
 
+val coroutinesVersion: String by project
+
 kotlin {
     jvm {
         compilations.all {
-            kotlinOptions.jvmTarget = "11"
+            kotlinOptions.jvmTarget = "17"
         }
     }
     sourceSets {
@@ -20,6 +22,8 @@ kotlin {
                 implementation(project(":common-ui"))
                 implementation(compose.desktop.currentOs)
                 implementation("io.github.microutils:kotlin-logging-jvm:2.0.13")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:$coroutinesVersion")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:$coroutinesVersion")
             }
         }
         val jvmTest by getting

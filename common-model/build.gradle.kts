@@ -6,6 +6,8 @@ plugins {
     id("org.jetbrains.compose")
 }
 
+val coroutinesVersion: String by project
+
 kotlin {
     android()
     jvm()
@@ -19,9 +21,9 @@ kotlin {
         named("commonMain") {
             dependencies {
                 api(compose.runtime)
-                api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
+                api("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
                 api("io.github.microutils:kotlin-logging:2.0.10")
-                api("io.jumpco.open:kfsm:1.5.2")
+                api("io.jumpco.open:kfsm:1.6.1-SNAPSHOT")
 
             }
         }
@@ -32,18 +34,17 @@ kotlin {
     }
 }
 android {
-    compileSdkVersion(31)
+    compileSdk = 31
 
     defaultConfig {
-        minSdkVersion(21)
-        targetSdkVersion(31)
-        versionCode = 1
-        versionName = "1.0"
+        minSdk = 21
+        targetSdk = 31
+
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
     sourceSets {
         named("main") {

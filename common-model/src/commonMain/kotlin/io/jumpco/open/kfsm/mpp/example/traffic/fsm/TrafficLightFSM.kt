@@ -4,9 +4,10 @@ import com.example.kfsm.compose.traffic.fsm.TrafficLightContext
 import com.example.kfsm.compose.traffic.fsm.TrafficLightEvents
 import com.example.kfsm.compose.traffic.fsm.TrafficLightStates
 import io.jumpco.open.kfsm.async.asyncStateMachine
+import kotlinx.coroutines.CoroutineScope
 import mu.KotlinLogging
 
-class TrafficLightFSM(context: TrafficLightContext) {
+class TrafficLightFSM(context: TrafficLightContext, coroutineScope: CoroutineScope) {
     companion object {
         private val logger = KotlinLogging.logger {}
         private val definition = asyncStateMachine(
@@ -127,7 +128,7 @@ class TrafficLightFSM(context: TrafficLightContext) {
         }.build()
     }
 
-    private val fsm = definition.create(context)
+    private val fsm = definition.create(context, coroutineScope)
     val currentState: TrafficLightStates get() = fsm.currentState
     suspend fun start() {
         fsm.sendEvent(TrafficLightEvents.GO)

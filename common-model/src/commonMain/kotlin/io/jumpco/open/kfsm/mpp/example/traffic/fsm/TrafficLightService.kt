@@ -2,7 +2,7 @@ package io.jumpco.open.kfsm.mpp.example.traffic.fsm
 
 import com.example.kfsm.compose.traffic.fsm.TrafficLightStates
 import io.jumpco.open.kfsm.mpp.example.traffic.common.AtomicCounter
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -11,12 +11,16 @@ import kotlinx.coroutines.flow.StateFlow
 import mu.KotlinLogging
 
 
-class TrafficLightService(lightName: String) : TrafficLightController {
+class TrafficLightService(
+    lightName: String,
+    uiCoroutineScope: CoroutineScope,
+    coroutineScope: CoroutineScope
+) : TrafficLightController {
     companion object {
         private val logger = KotlinLogging.logger {}
     }
 
-    private val fsm = TrafficLightFSM(this)
+    private val fsm = TrafficLightFSM(this, coroutineScope)
     private val amberChannel = Channel<Boolean>(2, BufferOverflow.DROP_OLDEST)
     private val redChannel = Channel<Boolean>(2, BufferOverflow.DROP_OLDEST)
     private val greenChannel = Channel<Boolean>(2, BufferOverflow.DROP_OLDEST)
@@ -43,9 +47,9 @@ class TrafficLightService(lightName: String) : TrafficLightController {
 
     init {
         logger.info { "init:start" }
-        channelToStateFlow("$name:amberChannel", amberChannel, _amber, Dispatchers.Main)
-        channelToStateFlow("$name:redChannel", redChannel, _red, Dispatchers.Main)
-        channelToStateFlow("$name:greenChannel", greenChannel, _green, Dispatchers.Main)
+        channelToStateFlow("$name:amberChannel", amberChannel, _amber, uiCoroutineScope, coroutineScope)
+        channelToStateFlow("$name:redChannel", redChannel, _red, uiCoroutineScope, coroutineScope)
+        channelToStateFlow("$name:greenChannel", greenChannel, _green, uiCoroutineScope, coroutineScope)
         logger.info { "init:end" }
     }
 

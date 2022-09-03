@@ -9,7 +9,9 @@ import kotlinx.coroutines.launch
 import mu.KotlinLogging
 
 class TrafficIntersectionService(
-    override val trafficLights: List<TrafficLightController>
+    override val trafficLights: List<TrafficLightController>,
+    private val uiCoroutineScope: CoroutineScope,
+    private val coroutineScope: CoroutineScope
 ) : TrafficIntersectionController {
     companion object {
         private val logger = KotlinLogging.logger {}
@@ -19,7 +21,7 @@ class TrafficIntersectionService(
     private val stoppedChannel = Channel<Long>(2, BufferOverflow.DROP_OLDEST)
     private val trafficLightData = mutableMapOf<String, TrafficLightController>()
     private val order = mutableListOf<String>()
-    private val intersectionFSM = TrafficIntersectionFSM(this)
+    private val intersectionFSM = TrafficIntersectionFSM(this, coroutineScope)
     private var _currentLight: TrafficLightController
 
     private var _cycleWaitTime: Long = 1000L
@@ -103,7 +105,7 @@ class TrafficIntersectionService(
         logger.info { "setupTrafficLight:$name:start" }
         val trafficLight = trafficLightData[name]
         requireNotNull(trafficLight) { "Expected to find TrafficLight:$name" }
-        channelToChannel("stopped$name", trafficLight.stopped, stoppedChannel)
+        channelToChannel("stopped$name", trafficLight.stopped, stoppedChannel, uiCoroutineScope, coroutineScope)
         logger.info { "startTrafficLight:$name:end" }
     }
 
