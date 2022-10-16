@@ -6,9 +6,9 @@ pluginManagement {
         maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     }
     plugins {
-        val kotlinVersion = "1.6.10"
+        val kotlinVersion = "1.7.10"
         val agpVersion = "7.0.4"
-        val composeVersion = "1.1.1"
+        val composeVersion = "1.2.0"
 
         kotlin("jvm").version(kotlinVersion)
         kotlin("multiplatform").version(kotlinVersion)

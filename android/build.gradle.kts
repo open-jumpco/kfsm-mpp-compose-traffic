@@ -7,18 +7,18 @@ plugins {
 val coroutinesVersion: String by project
 
 android {
-    compileSdkVersion(31)
+    compileSdkVersion(32)
 
     defaultConfig {
-        minSdkVersion(26)
-        targetSdkVersion(31)
+        minSdk = 26
+        targetSdk = 32
         versionCode = 1
         versionName = "1.0"
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 }
 configurations {
